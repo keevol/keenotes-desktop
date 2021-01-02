@@ -1,0 +1,10 @@
+.console {
+    -fx-text-fill: white;
+    -fx-font-family: monospace;
+    -fx-font-size: 16;
+}
+
+.console .content {
+    -fx-background-color: black;
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, +50%);
+}
