@@ -47,6 +47,9 @@ class KeeNotesFXApplication extends Application {
     val vbox = new VBox()
 
     val textArea = new TextArea()
+    textArea.setWrapText(true)
+    textArea.setStyle("-fx-font-size:21px;")
+//    textArea.setCursor(Cursor.TEXT);
     VBox.setVgrow(textArea, Priority.ALWAYS)
     VBox.setMargin(textArea, new Insets(0, 10, 10, 10))
     vbox.getChildren.add(textArea)

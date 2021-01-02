@@ -36,7 +36,7 @@
 
 .text-area .content {
     -fx-background-color: #464646;
-    -fx-prompt-text-fill: derive(-fx-control-inner-background, +50%);
+    -fx-prompt-text-fill: white;
 }
 
 .button {
@@ -45,9 +45,9 @@
 }
 
 /* Keep prompt invisible when focused (above color fix overrides it) */
-.text-input:focused {
-    -fx-prompt-text-fill: transparent;
-}
+/*.text-input:focused {*/
+    /*-fx-prompt-text-fill: transparent;*/
+/*}*/
 
 .console:error-message {
     -fx-text-fill: red;
