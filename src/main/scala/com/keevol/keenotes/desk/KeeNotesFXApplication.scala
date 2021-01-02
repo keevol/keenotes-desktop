@@ -1,6 +1,6 @@
 package com.keevol.keenotes.desk
 
-import com.keevol.keenotes.desk.KeeNotesFXApplication.clickable
+import com.keevol.keenotes.desk.KeeNotesFXApplication.{clickable, success}
 import javafx.application.{Application, Platform}
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control.{Button, Label, TextArea}
@@ -68,7 +68,7 @@ class KeeNotesFXApplication extends Application {
             readTimeout = settings.readTimeoutProperty.getValue)
           if (r.statusCode == 200) {
             textArea.clear()
-            // TODO notify
+            success()
           } else {
             logger.error(s"error: ${r.statusCode} - ${r.statusMessage}")
           }
@@ -100,7 +100,6 @@ class KeeNotesFXApplication extends Application {
     hbox.setAlignment(Pos.CENTER)
 
     val logoText = new Label("KeeNotes Desk")
-    //    logoText.setFont(Font.font(36))
     logoText.setFont(Font.font("Arial Black", 32))
     HBox.setMargin(logoText, new Insets(10))
 
@@ -146,6 +145,16 @@ object KeeNotesFXApplication {
     node.setOnMouseExited(e => {
       node.getScene.setCursor(Cursor.DEFAULT)
     })
+  }
+
+  def success() = {
+    System.getProperty("os.name").toLowerCase match {
+      case os if StringUtils.startsWith(os, "mac") => Runtime.getRuntime.exec(Array("osascript", "-e", """display notification "note sent successfully." with title "Success" subtitle "Success" sound name "Glass""""));
+      case os if StringUtils.startsWith(os, "win") =>
+      case _ =>
+    }
+
+
   }
 
   def main(args: Array[String]): Unit = {
