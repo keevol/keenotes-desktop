@@ -10,6 +10,7 @@ import javafx.scene.{Cursor, Node, Scene}
 import javafx.stage.{Stage, StageStyle}
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.controlsfx.control.Notifications
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -48,8 +49,7 @@ class KeeNotesFXApplication extends Application {
 
     val textArea = new TextArea()
     textArea.setWrapText(true)
-    textArea.setStyle("-fx-font-size:21px;")
-//    textArea.setCursor(Cursor.TEXT);
+    textArea.setCursor(Cursor.TEXT);
     VBox.setVgrow(textArea, Priority.ALWAYS)
     VBox.setMargin(textArea, new Insets(0, 10, 10, 10))
     vbox.getChildren.add(textArea)
@@ -71,12 +71,17 @@ class KeeNotesFXApplication extends Application {
             readTimeout = settings.readTimeoutProperty.getValue)
           if (r.statusCode == 200) {
             textArea.clear()
-            success()
+            info("Note Relayed!")
           } else {
-            logger.error(s"error: ${r.statusCode} - ${r.statusMessage}")
+            val err= s"error: ${r.statusCode} - ${r.statusMessage}"
+            logger.error(err)
+            error(err)
           }
         } catch {
-          case t: Throwable => logger.error(ExceptionUtils.getStackTrace(t))
+          case t: Throwable => {
+            logger.error(ExceptionUtils.getStackTrace(t))
+            error(ExceptionUtils.getStackTrace(t))
+          }
         } finally {
           textArea.setEditable(true)
           submit.setDisable(false)
@@ -134,6 +139,14 @@ class KeeNotesFXApplication extends Application {
     hbox.getChildren.addAll(placeholder1, copyright, placeholder2)
     HBox.setMargin(copyright, new Insets(10, 10, 10, 10))
     hbox
+  }
+
+  def info(message:String) = {
+    Notifications.create().darkStyle().title("Success").text(message).showInformation()
+  }
+
+  def error(message:String) = {
+    Notifications.create().darkStyle().title("Error").text(message).showError()
   }
 
 }

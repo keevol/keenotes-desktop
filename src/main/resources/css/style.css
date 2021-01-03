@@ -27,11 +27,13 @@
 .text-input {
     -fx-text-fill: white;
     -fx-background-color: #464646;
-    -fx-prompt-text-fill: derive(-fx-control-inner-background, +50%);
+    /*-fx-prompt-text-fill: derive(-fx-control-inner-background, +50%);*/
 }
 
 .text-area {
     -fx-text-fill: white;
+    -fx-font-size:21px;
+    -fx-prompt-text-fill: white;
 }
 
 .text-area .content {
