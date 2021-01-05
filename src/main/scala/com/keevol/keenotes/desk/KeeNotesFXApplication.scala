@@ -1,10 +1,13 @@
 package com.keevol.keenotes.desk
 
-import com.keevol.keenotes.desk.KeeNotesFXApplication.{clickable, success}
+import com.keevol.keenotes.desk.KeeNotesFXApplication.makeClickable
+import com.keevol.keenotes.desk.utils.SimpleProcessLoggerFactory
+import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control.{Button, Label, TextArea}
 import javafx.scene.layout._
+import javafx.scene.paint.{Color, Paint}
 import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Scene}
 import javafx.stage.{Stage, StageStyle}
@@ -14,6 +17,10 @@ import org.controlsfx.control.Notifications
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.util.concurrent.TimeUnit
+import scala.collection.JavaConverters.mapAsScalaMapConverter
+import scala.sys.process.Process
+
 
 class KeeNotesFXApplication extends Application {
 
@@ -21,7 +28,11 @@ class KeeNotesFXApplication extends Application {
 
   val settings = new Settings()
 
+  var primaryStage: Stage = _
+
   override def start(stage: Stage): Unit = {
+    primaryStage = stage
+
     val layout = new BorderPane()
     layout.setTop(header())
     layout.setCenter(notePane())
@@ -42,6 +53,8 @@ class KeeNotesFXApplication extends Application {
       System.exit(0)
     })
     stage.show()
+
+    CSSFX.start()
   }
 
   def notePane() = {
@@ -55,7 +68,7 @@ class KeeNotesFXApplication extends Application {
     vbox.getChildren.add(textArea)
 
     val submit = new Button("Submit")
-    clickable(submit)
+    makeClickable(submit)
     submit.setFont(Font.font("Arial Black", 17))
     submit.setOnAction(e => {
       val content = StringUtils.trimToEmpty(textArea.getText)
@@ -73,7 +86,7 @@ class KeeNotesFXApplication extends Application {
             textArea.clear()
             info("Note Relayed!")
           } else {
-            val err= s"error: ${r.statusCode} - ${r.statusMessage}"
+            val err = s"error: ${r.statusCode} - ${r.statusMessage}"
             logger.error(err)
             error(err)
           }
@@ -113,14 +126,42 @@ class KeeNotesFXApplication extends Application {
 
     val settingIcon = new FontIcon()
     settingIcon.setIconLiteral("fa-gear:32:aqua")
+    makeClickable(settingIcon)
     settingIcon.setOnMouseClicked(e => {
       settings.preferencesFX.show(true)
     })
-    clickable(settingIcon)
 
     HBox.setMargin(settingIcon, new Insets(10))
 
-    hbox.getChildren.addAll(logoText, placeholder(), settingIcon)
+    val sync = new FontIcon()
+    sync.setIconLiteral("fa-refresh:32:aqua")
+    makeClickable(sync)
+    sync.setOnMouseClicked(e => {
+      val processLogger = new SimpleProcessLoggerFactory
+
+      sync.setIconColor(Color.BLUE)
+      sync.getScene.setCursor(Cursor.WAIT)
+      try {
+        val exitCode = Process(Seq("bash", "-c", "***REMOVED***"), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
+        exitCode match {
+          case 0 => info("Note Synced Successfully.")
+          case _ => {
+            error(s"something goes wrong with exit code=$exitCode, check log for more information.")
+            logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+          }
+        }
+      } catch {
+        case t: Throwable => {
+          error(s"something goes wrong with exception thrown, check log for more information.")
+          logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+        }
+      } finally {
+        sync.getScene.setCursor(Cursor.DEFAULT)
+        sync.setIconColor(Color.AQUA)
+      }
+    })
+
+    hbox.getChildren.addAll(logoText, placeholder(), sync, settingIcon)
 
     hbox
   }
@@ -141,12 +182,12 @@ class KeeNotesFXApplication extends Application {
     hbox
   }
 
-  def info(message:String) = {
-    Notifications.create().darkStyle().title("Success").text(message).showInformation()
+  def info(message: String) = {
+    Notifications.create().darkStyle().title("Success").text(message).owner(primaryStage).showInformation()
   }
 
-  def error(message:String) = {
-    Notifications.create().darkStyle().title("Error").text(message).showError()
+  def error(message: String) = {
+    Notifications.create().darkStyle().title("Error").text(message).owner(primaryStage).showError()
   }
 
 }
@@ -154,7 +195,7 @@ class KeeNotesFXApplication extends Application {
 
 object KeeNotesFXApplication {
 
-  def clickable(node: Node) = {
+  def makeClickable(node: Node) = {
     node.setOnMouseEntered(e => {
       node.getScene.setCursor(Cursor.HAND)
     })
