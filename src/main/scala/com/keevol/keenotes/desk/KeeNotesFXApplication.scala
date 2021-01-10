@@ -1,6 +1,7 @@
 package com.keevol.keenotes.desk
 
-import com.keevol.javafx.utils.Icons
+import com.keevol.javafx.controls.{Card, SimpleCard}
+import com.keevol.javafx.utils.{Icons, ScrollPanes}
 import com.keevol.keenotes.desk.KeeNotesFXApplication.makeClickable
 import com.keevol.keenotes.desk.utils.{SimpleProcessLoggerFactory, Stages}
 import fr.brouillard.oss.cssfx.CSSFX
@@ -9,13 +10,13 @@ import javafx.application.{Application, Platform}
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.value.{WritableDoubleValue, WritableValue}
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.{Button, Label, ListView, ProgressBar, ProgressIndicator, TextArea}
+import javafx.scene.control.{Button, Label, ListCell, ListView, ProgressBar, ProgressIndicator, ScrollPane, TextArea}
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Parent, Scene}
 import javafx.stage.{Stage, StageStyle}
-import javafx.util.Duration
+import javafx.util.{Callback, Duration}
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.controlsfx.control.Notifications
@@ -23,6 +24,7 @@ import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -53,6 +55,30 @@ class KeeNotesFXApplication extends Application {
   val stackPane = new StackPane()
 
 
+  val noteList = new VBox(5)
+  //  noteList.setCellFactory(new Callback[ListView[Note], ListCell[Note]] {
+  //    override def call(param: ListView[Note]): ListCell[Note] = {
+  //      val lc = new ListCell[Note] {
+  //        override def updateItem(item: Note, empty: Boolean): Unit = {
+  //          super.updateItem(item, empty)
+  //          if (empty) {
+  ////            setText("")
+  //            setGraphic(null)
+  //          } else {
+  ////            setText(item.content)
+  ////            val card = new Card(item.channel + "/" + item.dt, item.content)
+  //            val card = new SimpleCard
+  //            card.header.setText("" + item.channel + "/" + item.dt)
+  //            card.content.setText(item.content)
+  //            setGraphic(card)
+  //          }
+  //        }
+  //      }
+  //      lc
+  //    }
+  //  })
+  //  noteList.setPlaceholder(new Label("No Note Exists Yet."))
+
   override def start(stage: Stage): Unit = {
     primaryStage = stage
 
@@ -68,7 +94,7 @@ class KeeNotesFXApplication extends Application {
     stage.setWidth(400)
     stage.setMaxWidth(400)
     stage.setHeight(600)
-    stage.setMinWidth(600)
+    stage.setMinHeight(600)
     stage.initStyle(StageStyle.UTILITY)
     stage.setOnCloseRequest(e => {
       Platform.exit()
@@ -107,6 +133,7 @@ class KeeNotesFXApplication extends Application {
 
     submit.setOnAction(e => {
       val content = StringUtils.trimToEmpty(textArea.getText)
+      val ch = "keenotes-desktop"
       if (StringUtils.isNotEmpty(content)) {
         mask.setWidth(400)
         mask.show()
@@ -119,21 +146,29 @@ class KeeNotesFXApplication extends Application {
           try {
             val r = requests.post(settings.noteRelayServerProperty.getValue,
               headers = Map("Content-Type" -> "application/x-www-form-urlencoded"),
-              params = Map("token" -> settings.tokenProperty.getValue, "channel" -> "keenotes-desktop", "text" -> content),
+              params = Map("token" -> settings.tokenProperty.getValue, "channel" -> ch, "text" -> content),
               connectTimeout = settings.connectTimeoutProperty.getValue,
               readTimeout = settings.readTimeoutProperty.getValue)
             if (r.statusCode == 200) {
-              textArea.clear()
-              info("Note Relayed!")
+              Platform.runLater(() => {
+                textArea.clear()
+
+                val card = new SimpleCard
+                card.header.setText(ch + "/" + new Date())
+                card.content.setText(content)
+                card.content.setMinHeight(50)
+                noteList.getChildren.add(card)
+                info("Note Relayed!")
+              })
             } else {
               val err = s"error: ${r.statusCode} - ${r.statusMessage}"
               logger.error(err)
-              error(err)
+              Platform.runLater(() => error(err))
             }
           } catch {
             case t: Throwable => {
               logger.error(ExceptionUtils.getStackTrace(t))
-              error(ExceptionUtils.getStackTrace(t))
+              Platform.runLater(() => error(ExceptionUtils.getStackTrace(t)))
             }
           } finally {
             Platform.runLater(() => {
@@ -153,11 +188,10 @@ class KeeNotesFXApplication extends Application {
     AnchorPane.setRightAnchor(submit, 10)
 
 
-    val noteList = new ListView
-    noteList.setPlaceholder(new Label("No Note Exists Yet."))
-    VBox.setVgrow(noteList, Priority.ALWAYS)
-    VBox.setMargin(noteList, new Insets(10))
-    vbox.getChildren.add(noteList)
+    val noteListWrapper = ScrollPanes.wrap(noteList)
+    VBox.setVgrow(noteListWrapper, Priority.ALWAYS)
+    VBox.setMargin(noteListWrapper, new Insets(10))
+    vbox.getChildren.add(noteListWrapper)
 
     vbox
   }
@@ -195,23 +229,23 @@ class KeeNotesFXApplication extends Application {
 
       sync.setIconColor(Color.BLUE)
       sync.getScene.setCursor(Cursor.WAIT)
-      Future{
+      Future {
         try {
           val exitCode = Process(Seq("bash", "-c", "***REMOVED***"), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
           exitCode match {
-            case 0 => info("Note Synced Successfully.")
+            case 0 => Platform.runLater(()=> info("Note Synced Successfully."))
             case _ => {
-              error(s"something goes wrong with exit code=$exitCode, check log for more information.")
+              Platform.runLater(()=> error(s"something goes wrong with exit code=$exitCode, check log for more information."))
               logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
             }
           }
         } catch {
           case t: Throwable => {
-            error(s"something goes wrong with exception thrown, check log for more information.")
+            Platform.runLater(()=> error(s"something goes wrong with exception thrown, check log for more information."))
             logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
           }
         } finally {
-          Platform.runLater(()=> {
+          Platform.runLater(() => {
             sync.getScene.setCursor(Cursor.DEFAULT)
             sync.setIconColor(Color.AQUA)
             mask.close()
