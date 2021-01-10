@@ -194,7 +194,11 @@
             <artifactId>cssfx</artifactId>
             <version>11.4.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.keevol</groupId>
+            <artifactId>utilitiesfx</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>

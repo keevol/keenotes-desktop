@@ -1,23 +1,27 @@
 package com.keevol.keenotes.desk
 
+import com.keevol.javafx.utils.Icons
 import com.keevol.keenotes.desk.KeeNotesFXApplication.makeClickable
 import com.keevol.keenotes.desk.utils.SimpleProcessLoggerFactory
 import fr.brouillard.oss.cssfx.CSSFX
+import javafx.animation.{FadeTransition, Interpolator, KeyFrame, KeyValue, Timeline}
 import javafx.application.{Application, Platform}
+import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.value.{WritableDoubleValue, WritableValue}
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control.{Button, Label, TextArea}
 import javafx.scene.layout._
-import javafx.scene.paint.{Color, Paint}
+import javafx.scene.paint.Color
 import javafx.scene.text.Font
-import javafx.scene.{Cursor, Node, Scene}
+import javafx.scene.{Cursor, Node, Parent, Scene}
 import javafx.stage.{Stage, StageStyle}
+import javafx.util.Duration
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.controlsfx.control.Notifications
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.sys.process.Process
 
@@ -28,7 +32,13 @@ class KeeNotesFXApplication extends Application {
 
   val settings = new Settings()
 
+  val noteList = new NoteList(this)
+
   var primaryStage: Stage = _
+
+  var noteTakingScene: Scene = _
+
+  var noteListScene: Scene = setupSceneWith(noteList)
 
   override def start(stage: Stage): Unit = {
     primaryStage = stage
@@ -38,10 +48,10 @@ class KeeNotesFXApplication extends Application {
     layout.setCenter(notePane())
     layout.setBottom(footer())
 
+    noteTakingScene = setupSceneWith(layout)
+    stage.setScene(noteTakingScene)
 
-    val scene = new Scene(layout)
-    scene.getStylesheets.add("/css/style.css")
-    stage.setScene(scene)
+    stage.setTitle("KeeNotes Desk")
     stage.setWidth(400)
     stage.setMaxWidth(400)
     stage.setHeight(600)
@@ -56,6 +66,14 @@ class KeeNotesFXApplication extends Application {
 
     CSSFX.start()
   }
+
+
+  def setupSceneWith(pane: Parent): Scene = {
+    val scene = new Scene(pane)
+    scene.getStylesheets.add("/css/style.css")
+    scene
+  }
+
 
   def notePane() = {
     val vbox = new VBox()
@@ -120,9 +138,9 @@ class KeeNotesFXApplication extends Application {
     val hbox = new HBox(10)
     hbox.setAlignment(Pos.CENTER)
 
-    val logoText = new Label("KeeNotes Desk")
-    logoText.setFont(Font.font("Arial Black", 32))
-    HBox.setMargin(logoText, new Insets(10))
+    //    val logoText = new Label("KeeNotes Desk")
+    //    logoText.setFont(Font.font("Arial Black", 32))
+    //    HBox.setMargin(logoText, new Insets(10))
 
     val settingIcon = new FontIcon()
     settingIcon.setIconLiteral("fa-gear:32:aqua")
@@ -161,7 +179,32 @@ class KeeNotesFXApplication extends Application {
       }
     })
 
-    hbox.getChildren.addAll(logoText, placeholder(), sync, settingIcon)
+    val mockSwitch = Icons.from(Icons.SPACE_SHUTTLE_LITERAL)
+    mockSwitch.setOnMouseClicked(e => {
+      // TODO add animation for better UE
+      //      val timeline = new Timeline()
+      //      val kv: KeyValue = new KeyValue(new SimpleDoubleProperty(primaryStage.getWidth).asInstanceOf[WritableValue[AnyVal]], 0, Interpolator.DISCRETE)
+      //      val keyFrame = new KeyFrame(Duration.seconds(1), Array[KeyValue](kv): _*)
+      //      timeline.getKeyFrames.add(keyFrame)
+      //      timeline.setOnFinished(e => {
+      //        primaryStage.setScene(noteListScene)
+      //      })
+      //      timeline.play()
+
+
+      val t = new FadeTransition(Duration.millis(1000), noteTakingScene.getRoot)
+      t.setFromValue(1.0)
+      t.setToValue(0.0)
+      t.autoReverseProperty().setValue(true)
+      t.setOnFinished(e => {
+        primaryStage.setScene(noteListScene)
+        noteTakingScene.getRoot.setOpacity(1.0)
+      })
+      t.play()
+
+    })
+
+    hbox.getChildren.addAll(placeholder(), mockSwitch, sync, settingIcon)
 
     hbox
   }
