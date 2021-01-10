@@ -2,6 +2,7 @@ package com.keevol.keenotes.desk
 
 import com.dlsc.preferencesfx.PreferencesFx
 import com.dlsc.preferencesfx.model.{Category, Group, Setting}
+import com.dlsc.preferencesfx.view.PreferencesFxDialog
 import javafx.beans.property.{SimpleIntegerProperty, SimpleStringProperty}
 
 class Settings {
@@ -21,5 +22,9 @@ class Settings {
     .debugHistoryMode(true)
     .instantPersistent(true)
     .saveSettings(true)
+
+  val f = preferencesFX.getClass.getDeclaredField("preferencesFxDialog")
+  f.setAccessible(true)
+  f.get(preferencesFX).asInstanceOf[PreferencesFxDialog].getStylesheets.add("/css/style.css")
 
 }

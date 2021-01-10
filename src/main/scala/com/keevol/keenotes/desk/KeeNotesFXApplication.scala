@@ -2,14 +2,14 @@ package com.keevol.keenotes.desk
 
 import com.keevol.javafx.utils.Icons
 import com.keevol.keenotes.desk.KeeNotesFXApplication.makeClickable
-import com.keevol.keenotes.desk.utils.SimpleProcessLoggerFactory
+import com.keevol.keenotes.desk.utils.{SimpleProcessLoggerFactory, Stages}
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.animation.{FadeTransition, Interpolator, KeyFrame, KeyValue, Timeline}
 import javafx.application.{Application, Platform}
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.value.{WritableDoubleValue, WritableValue}
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.{Button, Label, TextArea}
+import javafx.scene.control.{Button, Label, ListView, ProgressBar, ProgressIndicator, TextArea}
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -19,10 +19,14 @@ import javafx.util.Duration
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.controlsfx.control.Notifications
+import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters.mapAsScalaMapConverter
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.sys.process.Process
 
 
@@ -32,13 +36,22 @@ class KeeNotesFXApplication extends Application {
 
   val settings = new Settings()
 
-  val noteList = new NoteList(this)
+  val mask = new InProgressMask
 
   var primaryStage: Stage = _
 
-  var noteTakingScene: Scene = _
+  val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
+  so.setPrefWidth(300)
+  so.setLeft(Icons.SEARCH)
+  so.setOnKeyReleased(e => {
+    if (StringUtils.isNotEmpty(so.getText())) {
+      println("do something with: " + so.getText) // TODO searching as filtering
+    }
+  })
+  so.setOnAction(e => println("perform Searching As Filtering."))
 
-  var noteListScene: Scene = setupSceneWith(noteList)
+  val stackPane = new StackPane()
+
 
   override def start(stage: Stage): Unit = {
     primaryStage = stage
@@ -47,22 +60,22 @@ class KeeNotesFXApplication extends Application {
     layout.setTop(header())
     layout.setCenter(notePane())
     layout.setBottom(footer())
+    stackPane.getChildren.add(layout)
 
-    noteTakingScene = setupSceneWith(layout)
-    stage.setScene(noteTakingScene)
+    stage.setScene(setupSceneWith(stackPane))
 
     stage.setTitle("KeeNotes Desk")
     stage.setWidth(400)
     stage.setMaxWidth(400)
     stage.setHeight(600)
-    stage.setMaxHeight(600)
-    stage.setResizable(false)
+    stage.setMinWidth(600)
     stage.initStyle(StageStyle.UTILITY)
     stage.setOnCloseRequest(e => {
       Platform.exit()
       System.exit(0)
     })
     stage.show()
+    Stages.center(stage)
 
     CSSFX.start()
   }
@@ -81,49 +94,70 @@ class KeeNotesFXApplication extends Application {
     val textArea = new TextArea()
     textArea.setWrapText(true)
     textArea.setCursor(Cursor.TEXT);
-    VBox.setVgrow(textArea, Priority.ALWAYS)
+    //    VBox.setVgrow(textArea, Priority.ALWAYS)
+    textArea.setMinHeight(100)
+    textArea.setPrefHeight(100)
+    textArea.setMaxHeight(100)
     VBox.setMargin(textArea, new Insets(0, 10, 10, 10))
     vbox.getChildren.add(textArea)
 
     val submit = new Button("Submit")
     makeClickable(submit)
-    submit.setFont(Font.font("Arial Black", 17))
+    submit.setFont(Font.font("Arial Black", 11))
+
     submit.setOnAction(e => {
       val content = StringUtils.trimToEmpty(textArea.getText)
       if (StringUtils.isNotEmpty(content)) {
+        mask.setWidth(400)
+        mask.show()
+        Stages.center(mask, primaryStage)
+
         textArea.setEditable(false)
         submit.setDisable(true)
         submit.getScene.setCursor(Cursor.WAIT)
-        try {
-          val r = requests.post(settings.noteRelayServerProperty.getValue,
-            headers = Map("Content-Type" -> "application/x-www-form-urlencoded"),
-            params = Map("token" -> settings.tokenProperty.getValue, "channel" -> "keenotes-desktop", "text" -> content),
-            connectTimeout = settings.connectTimeoutProperty.getValue,
-            readTimeout = settings.readTimeoutProperty.getValue)
-          if (r.statusCode == 200) {
-            textArea.clear()
-            info("Note Relayed!")
-          } else {
-            val err = s"error: ${r.statusCode} - ${r.statusMessage}"
-            logger.error(err)
-            error(err)
+        Future {
+          try {
+            val r = requests.post(settings.noteRelayServerProperty.getValue,
+              headers = Map("Content-Type" -> "application/x-www-form-urlencoded"),
+              params = Map("token" -> settings.tokenProperty.getValue, "channel" -> "keenotes-desktop", "text" -> content),
+              connectTimeout = settings.connectTimeoutProperty.getValue,
+              readTimeout = settings.readTimeoutProperty.getValue)
+            if (r.statusCode == 200) {
+              textArea.clear()
+              info("Note Relayed!")
+            } else {
+              val err = s"error: ${r.statusCode} - ${r.statusMessage}"
+              logger.error(err)
+              error(err)
+            }
+          } catch {
+            case t: Throwable => {
+              logger.error(ExceptionUtils.getStackTrace(t))
+              error(ExceptionUtils.getStackTrace(t))
+            }
+          } finally {
+            Platform.runLater(() => {
+              textArea.setEditable(true)
+              submit.setDisable(false)
+              submit.getScene.setCursor(Cursor.DEFAULT)
+              mask.close()
+            })
           }
-        } catch {
-          case t: Throwable => {
-            logger.error(ExceptionUtils.getStackTrace(t))
-            error(ExceptionUtils.getStackTrace(t))
-          }
-        } finally {
-          textArea.setEditable(true)
-          submit.setDisable(false)
-          submit.getScene.setCursor(Cursor.DEFAULT)
         }
+
       }
     })
 
     vbox.getChildren.add(new AnchorPane(submit))
     AnchorPane.setLeftAnchor(submit, 10)
     AnchorPane.setRightAnchor(submit, 10)
+
+
+    val noteList = new ListView
+    noteList.setPlaceholder(new Label("No Note Exists Yet."))
+    VBox.setVgrow(noteList, Priority.ALWAYS)
+    VBox.setMargin(noteList, new Insets(10))
+    vbox.getChildren.add(noteList)
 
     vbox
   }
@@ -138,9 +172,7 @@ class KeeNotesFXApplication extends Application {
     val hbox = new HBox(10)
     hbox.setAlignment(Pos.CENTER)
 
-    //    val logoText = new Label("KeeNotes Desk")
-    //    logoText.setFont(Font.font("Arial Black", 32))
-    //    HBox.setMargin(logoText, new Insets(10))
+    HBox.setMargin(so, new Insets(10))
 
     val settingIcon = new FontIcon()
     settingIcon.setIconLiteral("fa-gear:32:aqua")
@@ -157,60 +189,46 @@ class KeeNotesFXApplication extends Application {
     sync.setOnMouseClicked(e => {
       val processLogger = new SimpleProcessLoggerFactory
 
+      mask.setWidth(400)
+      mask.show()
+      Stages.center(mask, primaryStage)
+
       sync.setIconColor(Color.BLUE)
       sync.getScene.setCursor(Cursor.WAIT)
-      try {
-        val exitCode = Process(Seq("bash", "-c", "***REMOVED***"), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
-        exitCode match {
-          case 0 => info("Note Synced Successfully.")
-          case _ => {
-            error(s"something goes wrong with exit code=$exitCode, check log for more information.")
+      Future{
+        try {
+          val exitCode = Process(Seq("bash", "-c", "***REMOVED***"), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
+          exitCode match {
+            case 0 => info("Note Synced Successfully.")
+            case _ => {
+              error(s"something goes wrong with exit code=$exitCode, check log for more information.")
+              logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+            }
+          }
+        } catch {
+          case t: Throwable => {
+            error(s"something goes wrong with exception thrown, check log for more information.")
             logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
           }
+        } finally {
+          Platform.runLater(()=> {
+            sync.getScene.setCursor(Cursor.DEFAULT)
+            sync.setIconColor(Color.AQUA)
+            mask.close()
+          })
         }
-      } catch {
-        case t: Throwable => {
-          error(s"something goes wrong with exception thrown, check log for more information.")
-          logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
-        }
-      } finally {
-        sync.getScene.setCursor(Cursor.DEFAULT)
-        sync.setIconColor(Color.AQUA)
       }
     })
 
-    val mockSwitch = Icons.from(Icons.SPACE_SHUTTLE_LITERAL)
-    mockSwitch.setOnMouseClicked(e => {
-      // TODO add animation for better UE
-      //      val timeline = new Timeline()
-      //      val kv: KeyValue = new KeyValue(new SimpleDoubleProperty(primaryStage.getWidth).asInstanceOf[WritableValue[AnyVal]], 0, Interpolator.DISCRETE)
-      //      val keyFrame = new KeyFrame(Duration.seconds(1), Array[KeyValue](kv): _*)
-      //      timeline.getKeyFrames.add(keyFrame)
-      //      timeline.setOnFinished(e => {
-      //        primaryStage.setScene(noteListScene)
-      //      })
-      //      timeline.play()
 
-
-      val t = new FadeTransition(Duration.millis(1000), noteTakingScene.getRoot)
-      t.setFromValue(1.0)
-      t.setToValue(0.0)
-      t.autoReverseProperty().setValue(true)
-      t.setOnFinished(e => {
-        primaryStage.setScene(noteListScene)
-        noteTakingScene.getRoot.setOpacity(1.0)
-      })
-      t.play()
-
-    })
-
-    hbox.getChildren.addAll(placeholder(), mockSwitch, sync, settingIcon)
+    hbox.getChildren.addAll(so, placeholder(), sync, settingIcon)
 
     hbox
   }
 
   def footer() = {
     val hbox = new HBox(10)
+    hbox.setStyle("-fx-background-color: #494949;")
 
     val placeholder1 = new Region
     HBox.setHgrow(placeholder1, Priority.ALWAYS)
@@ -221,7 +239,7 @@ class KeeNotesFXApplication extends Application {
     val copyright = new Label("© KEEVOL Consulting @keevol.com")
     copyright.setFont(Font.font("Arial Black", 9))
     hbox.getChildren.addAll(placeholder1, copyright, placeholder2)
-    HBox.setMargin(copyright, new Insets(10, 10, 10, 10))
+    HBox.setMargin(copyright, new Insets(3))
     hbox
   }
 

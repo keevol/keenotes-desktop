@@ -46,6 +46,10 @@
     -fx-background-color: #3383F8;
 }
 
+.list-view{
+    -fx-background-color: rgb(50, 50, 50);
+}
+
 /* Keep prompt invisible when focused (above color fix overrides it) */
 /*.text-input:focused {*/
     /*-fx-prompt-text-fill: transparent;*/
@@ -72,4 +76,25 @@
     -fx-padding: 0.2em 5em 0.2em 0.5em;
     -fx-text-fill: white;
     /*-fx-background-color: rgb(0, 50, 50);*/
+}
+
+.dialog-pane {
+    -fx-text-fill: white;
+    -fx-background-color: rgb(50, 50, 50);  /*== #323232 */
+}
+
+.dialog-pane .label {
+    -fx-text-fill: white;
+}
+
+.dialog-pane > *.button-bar > *.container{
+    -fx-background-color: #a9e200;
+}
+
+.dialog-pane > *.expandable-content {
+    -fx-background-color: rgb(50, 50, 50);
+}
+
+.dialog-pane:header .header-panel {
+    -fx-background-color: rgb(50, 50, 50);
 }
