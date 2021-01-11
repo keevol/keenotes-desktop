@@ -9,8 +9,19 @@ import java.io.File
 import java.sql.{PreparedStatement, ResultSet}
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.collection.mutable.ListBuffer
 
 class NoteRepository(settings: Settings) {
+
+  val noteRowMapper:RowMapper[Note] = new RowMapper[Note] {
+    override def mapRow(rs: ResultSet, i: Int): Note = {
+      val note = new Note()
+      note.channel = rs.getString("tags")
+      note.content = rs.getString("content")
+      note.dt = DateFormalizer.fromSqliteLocalTime(rs.getString("updated"))
+      note
+    }
+  }
 
   val executor: AtomicReference[Sqlite3] = new AtomicReference[Sqlite3]()
 
@@ -32,18 +43,14 @@ class NoteRepository(settings: Settings) {
       |                	updated TEXT DEFAULT (datetime('now','localtime')) -- datetime in ISO8601 format
       |                );""".stripMargin)
 
+
+
   def load(): Array[Note] = {
     val jdbc = executor.get().getExecutor()
-    Array(jdbc.query("""select * from notes order by datetime(updated) desc limit 11""", new RowMapper[Note] {
-      override def mapRow(rs: ResultSet, i: Int): Note = {
-        val note = new Note()
-        note.channel = rs.getString("tags")
-        note.content = rs.getString("content")
-        note.dt = DateFormalizer.fromSqliteLocalTime(rs.getString("updated"))
-        note
-      }
-    }).asScala:_*)
+    Array(jdbc.query("""select * from notes order by datetime(updated) desc limit 11""", noteRowMapper).asScala: _*)
   }
+
+  def search(keyword: String): List[Note] = executor.get().getExecutor().query(s"""select * from notes where content like "%$keyword%"""", noteRowMapper).asScala.toList
 
   def insert(note: Note) = {
     executor.get().getExecutor().update("insert into notes(content, tags, updated) values(?,?,?)", (ps: PreparedStatement) => {

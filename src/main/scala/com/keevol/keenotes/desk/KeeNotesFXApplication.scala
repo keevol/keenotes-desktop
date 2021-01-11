@@ -46,20 +46,32 @@ class KeeNotesFXApplication extends Application {
 
   var primaryStage: Stage = _
 
-  val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
-  so.setPrefWidth(300)
-  so.setLeft(Icons.SEARCH)
-  so.setOnKeyReleased(e => {
-    if (StringUtils.isNotEmpty(so.getText())) {
-      println("do something with: " + so.getText) // TODO searching as filtering
-    }
-  })
-  so.setOnAction(e => println("perform Searching As Filtering."))
 
   val stackPane = new StackPane()
 
 
   val noteList = new VBox(5)
+
+  val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
+  so.setPrefWidth(300)
+  so.setLeft(Icons.SEARCH)
+  //  so.setOnKeyReleased(e => {
+  //    if (StringUtils.isNotEmpty(so.getText())) {
+  //      println("do something with: " + so.getText)
+  //    }
+  //  })
+  val action: () => Unit = () => {
+    val keyword = StringUtils.trimToEmpty(so.getText)
+    noteList.getChildren.clear()
+    if (StringUtils.isNotEmpty(keyword)) {
+      val notes = repository.search(keyword)
+      notes.map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
+    } else {
+      repository.load().map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
+    }
+  }
+  so.asInstanceOf[CustomTextField].getRight.setOnMouseClicked(_ => action())
+  so.setOnAction(_ => action())
 
   override def start(stage: Stage): Unit = {
     primaryStage = stage
