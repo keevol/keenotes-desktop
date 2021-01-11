@@ -239,7 +239,8 @@ class KeeNotesFXApplication extends Application {
       sync.getScene.setCursor(Cursor.WAIT)
       Future {
         try {
-          val exitCode = Process(Seq("bash", "-c", "***REMOVED***"), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
+          if (StringUtils.isEmpty(StringUtils.trimToEmpty(settings.syncCommandProperty.get()))) throw new IllegalArgumentException(s"bad sync command: ${settings.syncCommandProperty}")
+          val exitCode = Process(Seq("bash", "-c", settings.syncCommandProperty.get()), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
           exitCode match {
             case 0 => Platform.runLater(() => info("Note Synced Successfully."))
             case _ => {
@@ -250,7 +251,7 @@ class KeeNotesFXApplication extends Application {
         } catch {
           case t: Throwable => {
             Platform.runLater(() => error(s"something goes wrong with exception thrown, check log for more information."))
-            logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+            logger.error(ExceptionUtils.getStackTrace(t)+"\n"+processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
           }
         } finally {
           Platform.runLater(() => {
@@ -289,10 +290,10 @@ class KeeNotesFXApplication extends Application {
     .skinType(SkinType.TEXT)
     .title(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
     .titleColor(Color.web("#3383F8"))
-//    .text(DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss"))
+    //    .text(DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss"))
     .description(content)
     .descriptionAlignment(Pos.CENTER_LEFT)
-//    .textColor(Color.web("gray"))
+    //    .textColor(Color.web("gray"))
     .textVisible(true)
     .build();
 

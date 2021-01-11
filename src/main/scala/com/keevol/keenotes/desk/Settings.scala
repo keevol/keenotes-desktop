@@ -13,6 +13,8 @@ class Settings {
 
   val sqliteFileProperty = new SimpleStringProperty(s"${System.getProperty("user.home")}/keenotes.sqlite3")
 
+  val syncCommandProperty = new SimpleStringProperty("")
+
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass,
     Category.of("KeeNotes Preferences",
       Group.of("Relay Server",
@@ -20,7 +22,9 @@ class Settings {
         Setting.of("Token", tokenProperty),
         Setting.of("Connect Timeout", connectTimeoutProperty),
         Setting.of("Read Timeout", readTimeoutProperty)),
-      Group.of("Keenotes Storage", Setting.of("Keenotes Sqlite", sqliteFileProperty))
+      Group.of("Keenotes Storage",
+        Setting.of("Keenotes Sqlite", sqliteFileProperty),
+        Setting.of("rsync note command", syncCommandProperty))
     )).buttonsVisibility(true)
     .debugHistoryMode(true)
     .instantPersistent(true)
