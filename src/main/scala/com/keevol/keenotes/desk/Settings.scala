@@ -11,13 +11,16 @@ class Settings {
   val connectTimeoutProperty = new SimpleIntegerProperty(30000)
   val readTimeoutProperty = new SimpleIntegerProperty(30000)
 
+  val sqliteFileProperty = new SimpleStringProperty(s"${System.getProperty("user.home")}/keenotes.sqlite3")
+
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass,
     Category.of("KeeNotes Preferences",
       Group.of("Relay Server",
         Setting.of("Note Server", noteRelayServerProperty),
         Setting.of("Token", tokenProperty),
         Setting.of("Connect Timeout", connectTimeoutProperty),
-        Setting.of("Read Timeout", readTimeoutProperty))
+        Setting.of("Read Timeout", readTimeoutProperty)),
+      Group.of("Keenotes Storage", Setting.of("Keenotes Sqlite", sqliteFileProperty))
     )).buttonsVisibility(true)
     .debugHistoryMode(true)
     .instantPersistent(true)

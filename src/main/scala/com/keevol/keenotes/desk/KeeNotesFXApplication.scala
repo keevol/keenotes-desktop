@@ -1,35 +1,35 @@
 package com.keevol.keenotes.desk
 
-import com.keevol.javafx.controls.{Card, SimpleCard}
 import com.keevol.javafx.utils.{Icons, ScrollPanes}
 import com.keevol.keenotes.desk.KeeNotesFXApplication.makeClickable
+import com.keevol.keenotes.desk.repository.NoteRepository
 import com.keevol.keenotes.desk.utils.{SimpleProcessLoggerFactory, Stages}
+import eu.hansolo.tilesfx.Tile.SkinType
+import eu.hansolo.tilesfx.TileBuilder
 import fr.brouillard.oss.cssfx.CSSFX
-import javafx.animation.{FadeTransition, Interpolator, KeyFrame, KeyValue, Timeline}
 import javafx.application.{Application, Platform}
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.value.{WritableDoubleValue, WritableValue}
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.{Button, Label, ListCell, ListView, ProgressBar, ProgressIndicator, ScrollPane, TextArea}
+import javafx.scene.control.{Button, Label, TextArea}
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Parent, Scene}
 import javafx.stage.{Stage, StageStyle}
-import javafx.util.{Callback, Duration}
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.apache.commons.lang3.time.DateFormatUtils
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.util.Date
-import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
+
+import com.keevol.javafx.utils.Platforms._
 
 
 class KeeNotesFXApplication extends Application {
@@ -37,6 +37,8 @@ class KeeNotesFXApplication extends Application {
   val logger: Logger = LoggerFactory.getLogger(classOf[KeeNotesFXApplication])
 
   val settings = new Settings()
+
+  val repository = new NoteRepository(settings)
 
   val mask = new InProgressMask
 
@@ -56,28 +58,6 @@ class KeeNotesFXApplication extends Application {
 
 
   val noteList = new VBox(5)
-  //  noteList.setCellFactory(new Callback[ListView[Note], ListCell[Note]] {
-  //    override def call(param: ListView[Note]): ListCell[Note] = {
-  //      val lc = new ListCell[Note] {
-  //        override def updateItem(item: Note, empty: Boolean): Unit = {
-  //          super.updateItem(item, empty)
-  //          if (empty) {
-  ////            setText("")
-  //            setGraphic(null)
-  //          } else {
-  ////            setText(item.content)
-  ////            val card = new Card(item.channel + "/" + item.dt, item.content)
-  //            val card = new SimpleCard
-  //            card.header.setText("" + item.channel + "/" + item.dt)
-  //            card.content.setText(item.content)
-  //            setGraphic(card)
-  //          }
-  //        }
-  //      }
-  //      lc
-  //    }
-  //  })
-  //  noteList.setPlaceholder(new Label("No Note Exists Yet."))
 
   override def start(stage: Stage): Unit = {
     primaryStage = stage
@@ -149,15 +129,14 @@ class KeeNotesFXApplication extends Application {
               params = Map("token" -> settings.tokenProperty.getValue, "channel" -> ch, "text" -> content),
               connectTimeout = settings.connectTimeoutProperty.getValue,
               readTimeout = settings.readTimeoutProperty.getValue)
+
+            repository.insert(new Note(content = content, channel = ch, dt = new Date()))
+
             if (r.statusCode == 200) {
               Platform.runLater(() => {
                 textArea.clear()
 
-                val card = new SimpleCard
-                card.header.setText(ch + "/" + new Date())
-                card.content.setText(content)
-                card.content.setMinHeight(50)
-                noteList.getChildren.add(card)
+                noteList.getChildren.add(0, tile(ch, content)) // desc order
                 info("Note Relayed!")
               })
             } else {
@@ -188,10 +167,39 @@ class KeeNotesFXApplication extends Application {
     AnchorPane.setRightAnchor(submit, 10)
 
 
+    //    val textTile = TileBuilder.create()
+    //      .skinType(SkinType.TEXT)
+    //      //      .prefSize(300, 300)
+    //      .title("Text Tile")
+    //      .text("Whatever text")
+    //      .description("May the force be with you\n...always")
+    //      .descriptionAlignment(Pos.TOP_LEFT)
+    //      .textVisible(true)
+    //      .build();
+    //
+    //    val textTile2 = TileBuilder.create()
+    //      .skinType(SkinType.TEXT)
+    //      //      .prefSize(300, 300)
+    //      .title("Text Tile")
+    //      .text("Whatever text")
+    //      .description("May the force be with you ...always, LIve Long And Prosper")
+    //      .descriptionAlignment(Pos.TOP_LEFT)
+    //      //      .textVisible(true)
+    //      .build();
+    //
+    //
+    //    noteList.getChildren.addAll(textTile, textTile2, tile("keenotes-desk", "yosbits の webサーバーは利用可能な状態になっています。工事業者による点検の結果、光ケーブルの信号レベルが基準範囲内ですが、張り替え作業を行うということで張り替えと終端措置の置き換えをされました。よく問題が起こるところから順に置き換えるというやり方をしているとのことで様子を見ます。"))
+
     val noteListWrapper = ScrollPanes.wrap(noteList)
     VBox.setVgrow(noteListWrapper, Priority.ALWAYS)
     VBox.setMargin(noteListWrapper, new Insets(10))
     vbox.getChildren.add(noteListWrapper)
+
+    Future {
+      repository.load().foreach(note => ui { () =>
+        noteList.getChildren.add(tile(note.channel, note.content, note.dt))
+      })
+    }
 
     vbox
   }
@@ -233,15 +241,15 @@ class KeeNotesFXApplication extends Application {
         try {
           val exitCode = Process(Seq("bash", "-c", "***REMOVED***"), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
           exitCode match {
-            case 0 => Platform.runLater(()=> info("Note Synced Successfully."))
+            case 0 => Platform.runLater(() => info("Note Synced Successfully."))
             case _ => {
-              Platform.runLater(()=> error(s"something goes wrong with exit code=$exitCode, check log for more information."))
+              Platform.runLater(() => error(s"something goes wrong with exit code=$exitCode, check log for more information."))
               logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
             }
           }
         } catch {
           case t: Throwable => {
-            Platform.runLater(()=> error(s"something goes wrong with exception thrown, check log for more information."))
+            Platform.runLater(() => error(s"something goes wrong with exception thrown, check log for more information."))
             logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
           }
         } finally {
@@ -276,6 +284,17 @@ class KeeNotesFXApplication extends Application {
     HBox.setMargin(copyright, new Insets(3))
     hbox
   }
+
+  def tile(channel: String, content: String, dt: Date = new Date()) = TileBuilder.create()
+    .skinType(SkinType.TEXT)
+    .title(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
+    .titleColor(Color.web("#3383F8"))
+//    .text(DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss"))
+    .description(content)
+    .descriptionAlignment(Pos.CENTER_LEFT)
+//    .textColor(Color.web("gray"))
+    .textVisible(true)
+    .build();
 
   def info(message: String) = {
     Notifications.create().darkStyle().title("Success").text(message).owner(primaryStage).showInformation()

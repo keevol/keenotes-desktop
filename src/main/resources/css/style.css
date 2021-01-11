@@ -1,7 +1,7 @@
 .root {
     -fx-base: rgb(50, 50, 50);
     -fx-background: rgb(50, 50, 50);
-
+    -fx-font-family: "Serif";
     /* make controls (buttons, thumb, etc.) slightly lighter */
     -fx-color: derive(-fx-base, 10%);
 
