@@ -1,9 +1,8 @@
 package com.keevol.keenotes.desk
 
-import com.keevol.javafx.utils.{Icons, ScrollPanes}
-import com.keevol.keenotes.desk.KeeNotesFXApplication.makeClickable
+import com.keevol.javafx.utils.{Icons, ScrollPanes, Stages}
+import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable}
 import com.keevol.keenotes.desk.repository.NoteRepository
-import com.keevol.keenotes.desk.utils.{SimpleProcessLoggerFactory, Stages}
 import eu.hansolo.tilesfx.Tile.SkinType
 import eu.hansolo.tilesfx.TileBuilder
 import fr.brouillard.oss.cssfx.CSSFX
@@ -28,8 +27,11 @@ import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
-
 import com.keevol.javafx.utils.Platforms._
+import com.keevol.keenotes.desk.utils.SimpleProcessLoggerFactory
+import javafx.beans.value.{ChangeListener, ObservableValue}
+
+import java.lang
 
 
 class KeeNotesFXApplication extends Application {
@@ -227,42 +229,10 @@ class KeeNotesFXApplication extends Application {
 
     val sync = new FontIcon()
     sync.setIconLiteral("fa-refresh:32:aqua")
-    makeClickable(sync)
-    sync.setOnMouseClicked(e => {
-      val processLogger = new SimpleProcessLoggerFactory
-
-      mask.setWidth(400)
-      mask.show()
-      Stages.center(mask, primaryStage)
-
-      sync.setIconColor(Color.BLUE)
-      sync.getScene.setCursor(Cursor.WAIT)
-      Future {
-        try {
-          if (StringUtils.isEmpty(StringUtils.trimToEmpty(settings.syncCommandProperty.get()))) throw new IllegalArgumentException(s"bad sync command: ${settings.syncCommandProperty}")
-          val exitCode = Process(Seq("bash", "-c", settings.syncCommandProperty.get()), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
-          exitCode match {
-            case 0 => Platform.runLater(() => info("Note Synced Successfully."))
-            case _ => {
-              Platform.runLater(() => error(s"something goes wrong with exit code=$exitCode, check log for more information."))
-              logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
-            }
-          }
-        } catch {
-          case t: Throwable => {
-            Platform.runLater(() => error(s"something goes wrong with exception thrown, check log for more information."))
-            logger.error(ExceptionUtils.getStackTrace(t)+"\n"+processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
-          }
-        } finally {
-          Platform.runLater(() => {
-            sync.getScene.setCursor(Cursor.DEFAULT)
-            sync.setIconColor(Color.AQUA)
-            mask.close()
-          })
-        }
-      }
+    settings.localStoreOnlyProperty.addListener(new ChangeListener[java.lang.Boolean] {
+      override def changed(observable: ObservableValue[_ <: lang.Boolean], oldValue: lang.Boolean, newValue: lang.Boolean): Unit = updateStateOfSyncUI(sync, newValue)
     })
-
+    updateStateOfSyncUI(sync, settings.localStoreOnlyProperty.get())
 
     hbox.getChildren.addAll(so, placeholder(), sync, settingIcon)
 
@@ -305,6 +275,52 @@ class KeeNotesFXApplication extends Application {
     Notifications.create().darkStyle().title("Error").text(message).owner(primaryStage).showError()
   }
 
+  def updateStateOfSyncUI(sync: FontIcon, newValue: lang.Boolean): Unit = {
+    if (newValue) {
+      sync.setIconColor(Color.GREY)
+      makeNonClickable(sync)
+      sync.setOnMouseClicked(null)
+    } else {
+      sync.setIconColor(Color.AQUA)
+      makeClickable(sync)
+      sync.setOnMouseClicked(e => {
+        val processLogger = new SimpleProcessLoggerFactory
+
+        mask.setWidth(400)
+        mask.show()
+        Stages.center(mask, primaryStage)
+
+        sync.setIconColor(Color.BLUE)
+        sync.getScene.setCursor(Cursor.WAIT)
+        Future {
+          try {
+            if (StringUtils.isEmpty(StringUtils.trimToEmpty(settings.syncCommandProperty.get()))) throw new IllegalArgumentException(s"bad sync command: ${settings.syncCommandProperty}")
+            val exitCode = Process(Seq("bash", "-c", settings.syncCommandProperty.get()), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
+            exitCode match {
+              case 0 => Platform.runLater(() => info("Note Synced Successfully."))
+              case _ => {
+                Platform.runLater(() => error(s"something goes wrong with exit code=$exitCode, check log for more information."))
+                logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+              }
+            }
+          } catch {
+            case t: Throwable => {
+              Platform.runLater(() => error(s"something goes wrong with exception thrown, check log for more information."))
+              logger.error(ExceptionUtils.getStackTrace(t) + "\n" + processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+            }
+          } finally {
+            Platform.runLater(() => {
+              sync.getScene.setCursor(Cursor.DEFAULT)
+              sync.setIconColor(Color.AQUA)
+              mask.close()
+            })
+          }
+        }
+      })
+    }
+  }
+
+
 }
 
 
@@ -313,6 +329,15 @@ object KeeNotesFXApplication {
   def makeClickable(node: Node) = {
     node.setOnMouseEntered(e => {
       node.getScene.setCursor(Cursor.HAND)
+    })
+    node.setOnMouseExited(e => {
+      node.getScene.setCursor(Cursor.DEFAULT)
+    })
+  }
+
+  def makeNonClickable(node: Node) = {
+    node.setOnMouseEntered(e => {
+      node.getScene.setCursor(Cursor.DEFAULT)
     })
     node.setOnMouseExited(e => {
       node.getScene.setCursor(Cursor.DEFAULT)
@@ -328,6 +353,7 @@ object KeeNotesFXApplication {
 
 
   }
+
 
   def main(args: Array[String]): Unit = {
     Application.launch(classOf[KeeNotesFXApplication], args: _*)

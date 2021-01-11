@@ -3,9 +3,12 @@ package com.keevol.keenotes.desk
 import com.dlsc.preferencesfx.PreferencesFx
 import com.dlsc.preferencesfx.model.{Category, Group, Setting}
 import com.dlsc.preferencesfx.view.PreferencesFxDialog
-import javafx.beans.property.{SimpleIntegerProperty, SimpleStringProperty}
+import javafx.beans.property.{SimpleBooleanProperty, SimpleIntegerProperty, SimpleStringProperty}
 
 class Settings {
+
+  val localStoreOnlyProperty = new SimpleBooleanProperty(true)
+
   val noteRelayServerProperty = new SimpleStringProperty("")
   val tokenProperty = new SimpleStringProperty("")
   val connectTimeoutProperty = new SimpleIntegerProperty(30000)
@@ -17,14 +20,19 @@ class Settings {
 
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass,
     Category.of("KeeNotes Preferences",
-      Group.of("Relay Server",
+
+      Group.of("Keenotes Local Configuration",
+        Setting.of("Local Store Only", localStoreOnlyProperty),
+        Setting.of("Keenotes Sqlite", sqliteFileProperty),
+      ),
+
+      Group.of("Remote Relay Server Configuration",
         Setting.of("Note Server", noteRelayServerProperty),
         Setting.of("Token", tokenProperty),
         Setting.of("Connect Timeout", connectTimeoutProperty),
-        Setting.of("Read Timeout", readTimeoutProperty)),
-      Group.of("Keenotes Storage",
-        Setting.of("Keenotes Sqlite", sqliteFileProperty),
+        Setting.of("Read Timeout", readTimeoutProperty),
         Setting.of("rsync note command", syncCommandProperty))
+
     )).buttonsVisibility(true)
     .debugHistoryMode(true)
     .instantPersistent(true)
