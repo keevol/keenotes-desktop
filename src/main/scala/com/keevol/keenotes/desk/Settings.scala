@@ -3,7 +3,7 @@ package com.keevol.keenotes.desk
 import com.dlsc.preferencesfx.PreferencesFx
 import com.dlsc.preferencesfx.model.{Category, Group, Setting}
 import com.dlsc.preferencesfx.view.PreferencesFxDialog
-import javafx.beans.property.{SimpleBooleanProperty, SimpleIntegerProperty, SimpleStringProperty}
+import javafx.beans.property.{SimpleBooleanProperty, SimpleDoubleProperty, SimpleIntegerProperty, SimpleStringProperty}
 
 class Settings {
 
@@ -18,6 +18,8 @@ class Settings {
 
   val syncCommandProperty = new SimpleStringProperty("")
 
+  val cardPrefHeightProperty = new SimpleDoubleProperty(111)
+
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass,
     Category.of("KeeNotes Preferences",
 
@@ -31,7 +33,8 @@ class Settings {
         Setting.of("Token", tokenProperty),
         Setting.of("Connect Timeout", connectTimeoutProperty),
         Setting.of("Read Timeout", readTimeoutProperty),
-        Setting.of("rsync note command", syncCommandProperty))
+        Setting.of("rsync note command", syncCommandProperty)),
+      Group.of("GUI Settings", Setting.of("Card Pref Height", cardPrefHeightProperty))
 
     )).buttonsVisibility(true)
     .debugHistoryMode(true)

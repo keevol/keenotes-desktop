@@ -1,5 +1,6 @@
 package com.keevol.keenotes.desk
 
+import com.keevol.javafx.controls.SimpleCard
 import com.keevol.javafx.utils.{AnchorPanes, Icons, ScrollPanes, Stages}
 import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable}
 import com.keevol.keenotes.desk.repository.NoteRepository
@@ -206,7 +207,7 @@ class KeeNotesFXApplication extends Application {
 
     val noteListWrapper = new ScrollPane(noteList)
     noteListWrapper.setFitToWidth(true)
-    VBox.setMargin(noteListWrapper, new Insets(10))
+    VBox.setMargin(noteListWrapper, new Insets(5, 10, 5, 10))
     vbox.getChildren.add(noteListWrapper)
 
     Future {
@@ -268,17 +269,25 @@ class KeeNotesFXApplication extends Application {
     hbox
   }
 
-  def tile(channel: String, content: String, dt: Date = new Date()) = TileBuilder.create()
-    .skinType(SkinType.TEXT)
-    .prefHeight(200)
-    .title(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
-    .titleColor(Color.web("#3383F8"))
-    //    .text(DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss"))
-    .description(content)
-    .descriptionAlignment(Pos.CENTER_LEFT)
-    //    .textColor(Color.web("gray"))
-    .textVisible(true)
-    .build();
+  def tile(channel: String, content: String, dt: Date = new Date()) = {
+    val card = new SimpleCard()
+    card.header.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
+    card.content.setText(content)
+    card.prefHeightProperty().bind(settings.cardPrefHeightProperty)
+    card
+
+    //    TileBuilder.create()
+    //      .skinType(SkinType.TEXT)
+    //      .prefHeight(50)
+    //      .title(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
+    //      .titleColor(Color.web("#3383F8"))
+    //      //    .text(DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss"))
+    //      .description(content)
+    //      .descriptionAlignment(Pos.CENTER_LEFT)
+    //      //    .textColor(Color.web("gray"))
+    //      .textVisible(true)
+    //      .build()
+  }
 
   def info(message: String) = {
     Notifications.create().darkStyle().title("Success").text(message).owner(primaryStage).showInformation()
