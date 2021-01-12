@@ -1,6 +1,6 @@
 package com.keevol.keenotes.desk
 
-import com.keevol.javafx.utils.{Icons, ScrollPanes, Stages}
+import com.keevol.javafx.utils.{AnchorPanes, Icons, ScrollPanes, Stages}
 import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable}
 import com.keevol.keenotes.desk.repository.NoteRepository
 import eu.hansolo.tilesfx.Tile.SkinType
@@ -8,7 +8,7 @@ import eu.hansolo.tilesfx.TileBuilder
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.{Button, Label, TextArea}
+import javafx.scene.control.{Button, Label, ScrollPane, TextArea}
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -204,8 +204,8 @@ class KeeNotesFXApplication extends Application {
     //
     //    noteList.getChildren.addAll(textTile, textTile2, tile("keenotes-desk", "yosbits の webサーバーは利用可能な状態になっています。工事業者による点検の結果、光ケーブルの信号レベルが基準範囲内ですが、張り替え作業を行うということで張り替えと終端措置の置き換えをされました。よく問題が起こるところから順に置き換えるというやり方をしているとのことで様子を見ます。"))
 
-    val noteListWrapper = ScrollPanes.wrap(noteList)
-    VBox.setVgrow(noteListWrapper, Priority.ALWAYS)
+    val noteListWrapper = new ScrollPane(noteList)
+    noteListWrapper.setFitToWidth(true)
     VBox.setMargin(noteListWrapper, new Insets(10))
     vbox.getChildren.add(noteListWrapper)
 
@@ -270,6 +270,7 @@ class KeeNotesFXApplication extends Application {
 
   def tile(channel: String, content: String, dt: Date = new Date()) = TileBuilder.create()
     .skinType(SkinType.TEXT)
+    .prefHeight(200)
     .title(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
     .titleColor(Color.web("#3383F8"))
     //    .text(DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss"))
