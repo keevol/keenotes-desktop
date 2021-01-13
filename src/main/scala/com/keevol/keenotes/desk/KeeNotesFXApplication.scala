@@ -51,6 +51,13 @@ class KeeNotesFXApplication extends Application {
   val stackPane = new StackPane()
 
 
+  val textArea = new TextArea()
+  textArea.setWrapText(true)
+  textArea.setCursor(Cursor.TEXT);
+  textArea.setMinHeight(100)
+  textArea.setPrefHeight(100)
+  textArea.setMaxHeight(100)
+
   val noteList = new VBox(5)
 
   val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
@@ -84,7 +91,7 @@ class KeeNotesFXApplication extends Application {
     stackPane.getChildren.add(layout)
 
     stage.setScene(setupSceneWith(stackPane))
-
+    stage.setOnShown(e => textArea.requestFocus())
     stage.setTitle("KeeNotes Desk")
     stage.setWidth(400)
     stage.setMaxWidth(400)
@@ -112,13 +119,6 @@ class KeeNotesFXApplication extends Application {
   def notePane() = {
     val vbox = new VBox()
 
-    val textArea = new TextArea()
-    textArea.setWrapText(true)
-    textArea.setCursor(Cursor.TEXT);
-    //    VBox.setVgrow(textArea, Priority.ALWAYS)
-    textArea.setMinHeight(100)
-    textArea.setPrefHeight(100)
-    textArea.setMaxHeight(100)
     VBox.setMargin(textArea, new Insets(0, 10, 10, 10))
     vbox.getChildren.add(textArea)
 
