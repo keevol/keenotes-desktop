@@ -47,9 +47,7 @@ class KeeNotesFXApplication extends Application {
 
   var primaryStage: Stage = _
 
-
   val stackPane = new StackPane()
-
 
   val textArea = new TextArea()
   textArea.setWrapText(true)
