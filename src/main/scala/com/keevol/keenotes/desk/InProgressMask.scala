@@ -13,6 +13,7 @@ class InProgressMask extends Stage {
   layout.setPadding(new Insets(10))
 
   val title = new Label("Processing...")
+  title.setStyle("-fx-text-fill: white;")
 
   val indicator = new ProgressBar()
   layout.getChildren.addAll(title, new AnchorPane(indicator))
