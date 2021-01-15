@@ -34,7 +34,7 @@ class Settings {
         Setting.of("Connect Timeout", connectTimeoutProperty),
         Setting.of("Read Timeout", readTimeoutProperty),
         Setting.of("rsync note command", syncCommandProperty)),
-      Group.of("GUI Settings", Setting.of("Card Pref Height", cardPrefHeightProperty))
+      Group.of("GUI Settings", Setting.of("Card Pref Height(deprecated)", cardPrefHeightProperty))
 
     )).buttonsVisibility(true)
     .debugHistoryMode(true)

@@ -29,6 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
 import com.keevol.javafx.utils.Platforms._
+import com.keevol.keenotes.KeeNoteCard
 import com.keevol.keenotes.desk.utils.SimpleProcessLoggerFactory
 import javafx.beans.value.{ChangeListener, ObservableValue}
 
@@ -205,7 +206,7 @@ class KeeNotesFXApplication extends Application {
 
     val noteListWrapper = new ScrollPane(noteList)
     noteListWrapper.setFitToWidth(true)
-    VBox.setMargin(noteListWrapper, new Insets(5, 10, 5, 10))
+    VBox.setMargin(noteListWrapper, new Insets(10, 10, 5, 10))
     vbox.getChildren.add(noteListWrapper)
 
     Future {
@@ -268,23 +269,11 @@ class KeeNotesFXApplication extends Application {
   }
 
   def tile(channel: String, content: String, dt: Date = new Date()) = {
-    val card = new SimpleCard()
-    card.header.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
+    val card = new KeeNoteCard
+    card.title.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
     card.content.setText(content)
-    card.prefHeightProperty().bind(settings.cardPrefHeightProperty)
+    //        card.prefHeightProperty().bind(settings.cardPrefHeightProperty)
     card
-
-    //    TileBuilder.create()
-    //      .skinType(SkinType.TEXT)
-    //      .prefHeight(50)
-    //      .title(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
-    //      .titleColor(Color.web("#3383F8"))
-    //      //    .text(DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss"))
-    //      .description(content)
-    //      .descriptionAlignment(Pos.CENTER_LEFT)
-    //      //    .textColor(Color.web("gray"))
-    //      .textVisible(true)
-    //      .build()
   }
 
   def info(message: String) = {
