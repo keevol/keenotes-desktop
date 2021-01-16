@@ -13,9 +13,9 @@
 <?import javafx.scene.control.Separator?>
 <fx:root type="javafx.scene.layout.StackPane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
 
-      <VBox spacing="5.0" style="-fx-background-color: #464646;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox spacing="5.0" style="-fx-background-color: #464646; -fx-background-radius:11;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
          <children>
             <HBox alignment="CENTER_LEFT" prefHeight="20.0" spacing="10.0">
@@ -36,7 +36,7 @@
             <Separator opacity="0.2"></Separator>
             <Label fx:id="content" alignment="TOP_LEFT" style="-fx-text-fill: white;" text="content" wrapText="true" VBox.vgrow="ALWAYS">
                <font>
-                  <Font size="17.0" />
+                  <Font size="14.0" />
                </font>
             </Label>
          </children>

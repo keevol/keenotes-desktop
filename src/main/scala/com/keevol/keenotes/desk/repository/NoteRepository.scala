@@ -1,6 +1,7 @@
 package com.keevol.keenotes.desk.repository
 
-import com.keevol.keenotes.desk.{Note, Settings}
+import com.keevol.keenotes.desk.Note
+import com.keevol.keenotes.desk.settings.Settings
 import com.keevol.utils.DateFormalizer
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import org.springframework.jdbc.core.RowMapper

@@ -12,7 +12,7 @@ import javafx.geometry.{Insets, Pos}
 import javafx.scene.control.{Button, Label, ScrollPane, TextArea}
 import javafx.scene.layout._
 import javafx.scene.paint.Color
-import javafx.scene.text.Font
+import javafx.scene.text.{Font, FontWeight}
 import javafx.scene.{Cursor, Node, Parent, Scene}
 import javafx.stage.{Stage, StageStyle}
 import org.apache.commons.lang3.StringUtils
@@ -30,8 +30,12 @@ import scala.concurrent.Future
 import scala.sys.process.Process
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.keenotes.KeeNoteCard
-import com.keevol.keenotes.desk.utils.SimpleProcessLoggerFactory
+import com.keevol.keenotes.desk.settings.Settings
+import com.keevol.keenotes.desk.utils.{FontStringConverter, SimpleProcessLoggerFactory}
+import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.{ChangeListener, ObservableValue}
+import javafx.util.StringConverter
 
 import java.lang
 
@@ -273,6 +277,8 @@ class KeeNotesFXApplication extends Application {
     card.title.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
     card.content.setText(content)
     //        card.prefHeightProperty().bind(settings.cardPrefHeightProperty)
+
+    Bindings.bindBidirectional(settings.fontProperty, card.content.fontProperty(), new FontStringConverter())
     card
   }
 
