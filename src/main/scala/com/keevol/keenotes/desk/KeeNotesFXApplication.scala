@@ -139,26 +139,25 @@ class KeeNotesFXApplication extends Application {
         submit.getScene.setCursor(Cursor.WAIT)
         Future {
           try {
-            val r = requests.post(settings.noteRelayServerProperty.getValue,
-              headers = Map("Content-Type" -> "application/x-www-form-urlencoded"),
-              params = Map("token" -> settings.tokenProperty.getValue, "channel" -> ch, "text" -> content),
-              connectTimeout = settings.connectTimeoutProperty.getValue,
-              readTimeout = settings.readTimeoutProperty.getValue)
-
             repository.insert(new Note(content = content, channel = ch, dt = new Date()))
 
-            if (r.statusCode == 200) {
-              Platform.runLater(() => {
-                textArea.clear()
-
-                noteList.getChildren.add(0, tile(ch, content)) // desc order
-                info("Note Relayed!")
-              })
-            } else {
-              val err = s"error: ${r.statusCode} - ${r.statusMessage}"
-              logger.error(err)
-              Platform.runLater(() => error(err))
+            if(!settings.localStoreOnlyProperty.get()) {
+              val r = requests.post(settings.noteRelayServerProperty.getValue,
+                headers = Map("Content-Type" -> "application/x-www-form-urlencoded"),
+                params = Map("token" -> settings.tokenProperty.getValue, "channel" -> ch, "text" -> content),
+                connectTimeout = settings.connectTimeoutProperty.getValue,
+                readTimeout = settings.readTimeoutProperty.getValue)
+              if (r.statusCode != 200) {
+                throw new Exception(s"remote note relay error: ${r.statusCode} - ${r.statusMessage}")
+              }
             }
+
+            ui {
+              textArea.clear()
+              noteList.getChildren.add(0, tile(ch, content)) // desc order
+              info("Note Added!")
+            }
+
           } catch {
             case t: Throwable => {
               logger.error(ExceptionUtils.getStackTrace(t))
@@ -288,7 +287,7 @@ class KeeNotesFXApplication extends Application {
         mask.show()
         Stages.center(mask, primaryStage)
 
-        sync.setIconColor(Color.BLUE)
+        sync.setIconColor(Color.GRAY)
         sync.getScene.setCursor(Cursor.WAIT)
         Future {
           try {
