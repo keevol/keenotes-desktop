@@ -1,0 +1,8 @@
+# Release Note
+
+1. add setting of custom font for note card;
+2. make progress bar transparent;
+3. deprecate card height setting when switch card control from TextArea to Label;
+4. double-click note card will copy note content to clipboard for sharing to chat or somewhere;
+5. add share button for future extensions;
+6. since note count will not be so big to fit in the memory, we cut loose the note count for display, but you can control the minimal count via setting;

@@ -1,6 +1,6 @@
 package com.keevol.keenotes.desk.repository
 
-import com.keevol.keenotes.desk.Note
+import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.settings.Settings
 import com.keevol.utils.DateFormalizer
 import javafx.beans.value.{ChangeListener, ObservableValue}
@@ -46,9 +46,9 @@ class NoteRepository(settings: Settings) {
 
 
 
-  def load(): Array[Note] = {
+  def load(limitCount: Int = 11): Array[Note] = {
     val jdbc = executor.get().getExecutor()
-    Array(jdbc.query("""select * from notes order by datetime(updated) desc limit 11""", noteRowMapper).asScala: _*)
+    Array(jdbc.query(s"""select * from notes order by datetime(updated) desc limit $limitCount""", noteRowMapper).asScala: _*)
   }
 
   def search(keyword: String): List[Note] = executor.get().getExecutor().query(s"""select * from notes where content like "%$keyword%"""", noteRowMapper).asScala.toList

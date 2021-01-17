@@ -1,4 +1,4 @@
-package com.keevol.keenotes.desk
+package com.keevol.keenotes.desk.domains
 
 import java.util.Date
 

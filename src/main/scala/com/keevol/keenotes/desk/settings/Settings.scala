@@ -4,7 +4,7 @@ import com.dlsc.formsfx.model.structure.Field
 import com.dlsc.preferencesfx.PreferencesFx
 import com.dlsc.preferencesfx.model.{Category, Group, Setting}
 import com.dlsc.preferencesfx.view.PreferencesFxDialog
-import javafx.beans.property.{SimpleBooleanProperty, SimpleDoubleProperty, SimpleIntegerProperty, SimpleObjectProperty, SimpleStringProperty}
+import javafx.beans.property.{SimpleBooleanProperty, SimpleDoubleProperty, SimpleIntegerProperty, SimpleLongProperty, SimpleObjectProperty, SimpleStringProperty}
 import javafx.scene.text.Font
 
 class Settings {
@@ -20,7 +20,7 @@ class Settings {
 
   val syncCommandProperty = new SimpleStringProperty("")
 
-  val cardPrefHeightProperty = new SimpleDoubleProperty(111)
+  val noteDisplayLimitProperty = new SimpleIntegerProperty()
   val fontProperty = new SimpleStringProperty("Serif")
 
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass,
@@ -38,7 +38,7 @@ class Settings {
         Setting.of("Read Timeout", readTimeoutProperty),
         Setting.of("rsync note command", syncCommandProperty)),
       Group.of("GUI Settings",
-        Setting.of("Card Pref Height(deprecated)", cardPrefHeightProperty),
+        Setting.of("Note Display Num.", noteDisplayLimitProperty),
         Setting.of("Font", Field.ofStringType(fontProperty).render(new SimpleFontControl()), fontProperty)
       )
 

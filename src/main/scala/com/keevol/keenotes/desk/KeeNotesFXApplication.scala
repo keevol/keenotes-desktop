@@ -30,6 +30,8 @@ import scala.concurrent.Future
 import scala.sys.process.Process
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.keenotes.KeeNoteCard
+import com.keevol.keenotes.desk.controls.InProgressMask
+import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.settings.Settings
 import com.keevol.keenotes.desk.utils.{FontStringConverter, SimpleProcessLoggerFactory}
 import javafx.beans.binding.Bindings
@@ -214,7 +216,8 @@ class KeeNotesFXApplication extends Application {
     vbox.getChildren.add(noteListWrapper)
 
     Future {
-      repository.load().foreach(note => ui { () =>
+      val loadLimit = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
+      repository.load(loadLimit).foreach(note => ui { () =>
         noteList.getChildren.add(tile(note.channel, note.content, note.dt))
       })
     }

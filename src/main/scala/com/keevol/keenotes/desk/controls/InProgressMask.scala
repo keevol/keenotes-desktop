@@ -1,4 +1,4 @@
-package com.keevol.keenotes.desk
+package com.keevol.keenotes.desk.controls
 
 import com.keevol.javafx.utils.AnchorPanes
 import javafx.geometry.Insets
