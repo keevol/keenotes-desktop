@@ -48,6 +48,7 @@ class KeeNotesFXApplication extends Application {
   val logger: Logger = LoggerFactory.getLogger(classOf[KeeNotesFXApplication])
 
   val settings = new Settings()
+  val fontStringConverter = new FontStringConverter()
 
   val repository = new NoteRepository(settings)
 
@@ -213,17 +214,11 @@ class KeeNotesFXApplication extends Application {
       val loadLimit = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
       val notes = repository.load(loadLimit)
       logger.info("note count at load: {}", notes.size)
-      val cnt: AtomicInteger = new AtomicInteger(0)
       for (note <- notes) {
-        println(cnt.incrementAndGet())
         Platforms.ui() {
           noteList.getChildren.add(tile(note.channel, note.content, note.dt))
         }
       }
-      //      notes.foreach(note =>{
-      //        println(cnt.incrementAndGet())
-      //        noteList.getChildren.add(tile(note.channel, note.content, note.dt))
-      //      })
     }
 
     vbox
@@ -284,8 +279,8 @@ class KeeNotesFXApplication extends Application {
     card.title.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
     card.content.setText(content)
     //        card.prefHeightProperty().bind(settings.cardPrefHeightProperty)
-
-    Bindings.bindBidirectional(settings.fontProperty, card.content.fontProperty(), new FontStringConverter())
+    card.content.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
+    Bindings.bindBidirectional(settings.fontProperty, card.content.fontProperty(), fontStringConverter)
     card
   }
 

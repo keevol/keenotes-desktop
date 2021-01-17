@@ -36,28 +36,20 @@ class SimpleFontControl extends SimpleControl[StringField, StackPane] {
         val font = p.get()
         println("font.toString: " + font.toString)
         textField.setText(fontStringConverter.toString(font))
+        field.valueProperty().set(fontStringConverter.toString(font))
         field.persist()
       }
     })
-
+    textField.setText(field.getValue)
     val hbox = new HBox(10)
     hbox.setPadding(new Insets(3))
     hbox.getChildren.addAll(textField, fontChooseButton)
     HBox.setHgrow(textField, Priority.ALWAYS)
 
     node.getChildren.add(hbox)
-
   }
 
   override def layoutParts(): Unit = {
 
-  }
-
-  override def setupBindings(): Unit = {
-    super.setupBindings()
-    // without this, PreferencesFX will throw exception.
-    if (field.valueProperty.get == "null" || field.valueProperty.get == null) field.valueProperty.set("")
-
-    field.valueProperty().bindBidirectional(textField.textProperty())
   }
 }
