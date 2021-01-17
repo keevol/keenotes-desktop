@@ -36,6 +36,7 @@ class SimpleFontControl extends SimpleControl[StringField, StackPane] {
         val font = p.get()
         println("font.toString: " + font.toString)
         textField.setText(fontStringConverter.toString(font))
+        field.persist()
       }
     })
 

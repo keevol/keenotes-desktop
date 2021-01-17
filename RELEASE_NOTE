@@ -7,4 +7,6 @@
 5. add share button for future extensions;
 6. since note count will not be so big to fit in the memory, we cut loose the note count for display, but you can control the minimal count via setting;
 7. setFill for scene to avoid flickering when open the window. (tip from @dlemmermann)
+8. fix bug on multithreading.
+9. fix bug on preferencesFX custom control persist;
 

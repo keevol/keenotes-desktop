@@ -4,6 +4,7 @@ import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.settings.Settings
 import com.keevol.utils.DateFormalizer
 import javafx.beans.value.{ChangeListener, ObservableValue}
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.jdbc.core.RowMapper
 
 import java.io.File
@@ -13,6 +14,7 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.mutable.ListBuffer
 
 class NoteRepository(settings: Settings) {
+  val logger:Logger = LoggerFactory.getLogger(classOf[NoteRepository])
 
   val noteRowMapper:RowMapper[Note] = new RowMapper[Note] {
     override def mapRow(rs: ResultSet, i: Int): Note = {
@@ -46,9 +48,11 @@ class NoteRepository(settings: Settings) {
 
 
 
-  def load(limitCount: Int = 11): Array[Note] = {
+  def load(limitCount: Int = 11): List[Note] = {
+    val q = s"""select * from notes order by datetime(updated) desc limit $limitCount"""
+    logger.info(s"load notes from db with sql='${q}'")
     val jdbc = executor.get().getExecutor()
-    Array(jdbc.query(s"""select * from notes order by datetime(updated) desc limit $limitCount""", noteRowMapper).asScala: _*)
+    jdbc.query(q, noteRowMapper).asScala.toList
   }
 
   def search(keyword: String): List[Note] = executor.get().getExecutor().query(s"""select * from notes where content like "%$keyword%"""", noteRowMapper).asScala.toList

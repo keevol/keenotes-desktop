@@ -1,7 +1,7 @@
 package com.keevol.keenotes.desk
 
 import com.keevol.javafx.controls.SimpleCard
-import com.keevol.javafx.utils.{AnchorPanes, Icons, ScrollPanes, Stages}
+import com.keevol.javafx.utils.{AnchorPanes, Icons, Platforms, ScrollPanes, Stages}
 import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable}
 import com.keevol.keenotes.desk.repository.NoteRepository
 import eu.hansolo.tilesfx.Tile.SkinType
@@ -40,6 +40,7 @@ import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.util.StringConverter
 
 import java.lang
+import java.util.concurrent.atomic.AtomicInteger
 
 
 class KeeNotesFXApplication extends Application {
@@ -98,10 +99,13 @@ class KeeNotesFXApplication extends Application {
     stage.setScene(setupSceneWith(stackPane))
     stage.setOnShown(e => textArea.requestFocus())
     stage.setTitle("KeeNotes Desk")
-    stage.setWidth(400)
-    stage.setMaxWidth(400)
-    stage.setHeight(600)
-    stage.setMinHeight(600)
+    val WIDTH = 400
+    val HEIGHT = 600
+    stage.setWidth(WIDTH)
+    stage.setMinWidth(WIDTH)
+    stage.setMaxWidth(WIDTH)
+    stage.setHeight(HEIGHT)
+    stage.setMinHeight(HEIGHT)
     stage.initStyle(StageStyle.UTILITY)
     stage.setOnCloseRequest(e => {
       Platform.exit()
@@ -188,39 +192,38 @@ class KeeNotesFXApplication extends Application {
     AnchorPane.setRightAnchor(submit, 10)
 
 
-    //    val textTile = TileBuilder.create()
-    //      .skinType(SkinType.TEXT)
-    //      //      .prefSize(300, 300)
-    //      .title("Text Tile")
-    //      .text("Whatever text")
-    //      .description("May the force be with you\n...always")
-    //      .descriptionAlignment(Pos.TOP_LEFT)
-    //      .textVisible(true)
-    //      .build();
-    //
-    //    val textTile2 = TileBuilder.create()
-    //      .skinType(SkinType.TEXT)
-    //      //      .prefSize(300, 300)
-    //      .title("Text Tile")
-    //      .text("Whatever text")
-    //      .description("May the force be with you ...always, LIve Long And Prosper")
-    //      .descriptionAlignment(Pos.TOP_LEFT)
-    //      //      .textVisible(true)
-    //      .build();
-    //
-    //
-    //    noteList.getChildren.addAll(textTile, textTile2, tile("keenotes-desk", "yosbits の webサーバーは利用可能な状態になっています。工事業者による点検の結果、光ケーブルの信号レベルが基準範囲内ですが、張り替え作業を行うということで張り替えと終端措置の置き換えをされました。よく問題が起こるところから順に置き換えるというやり方をしているとのことで様子を見ます。"))
-
     val noteListWrapper = new ScrollPane(noteList)
+    //    noteListWrapper.viewportBoundsProperty().addListener((_, _, arg2) => {
+    //      val content = noteListWrapper.getContent();
+    //      noteListWrapper.setFitToWidth(content.prefWidth(-1) < arg2.getWidth());
+    //      noteListWrapper.setFitToHeight(content.prefHeight(-1) < arg2.getHeight());
+    //    })
     noteListWrapper.setFitToWidth(true)
-    VBox.setMargin(noteListWrapper, new Insets(10, 10, 5, 10))
-    vbox.getChildren.add(noteListWrapper)
+
+    val ap = new AnchorPane(noteListWrapper)
+    AnchorPanes.stickAllEdges(noteListWrapper)
+    VBox.setMargin(ap, new Insets(10, 10, 5, 10))
+    VBox.setVgrow(ap, Priority.ALWAYS)
+    vbox.getChildren.add(ap)
+    //    VBox.setMargin(noteListWrapper, new Insets(10, 10, 5, 10))
+    //    VBox.setVgrow(noteListWrapper, Priority.ALWAYS)
+    //    vbox.getChildren.add(noteListWrapper)
 
     Future {
       val loadLimit = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
-      repository.load(loadLimit).foreach(note => ui { () =>
-        noteList.getChildren.add(tile(note.channel, note.content, note.dt))
-      })
+      val notes = repository.load(loadLimit)
+      logger.info("note count at load: {}", notes.size)
+      val cnt: AtomicInteger = new AtomicInteger(0)
+      for (note <- notes) {
+        println(cnt.incrementAndGet())
+        Platforms.ui() {
+          noteList.getChildren.add(tile(note.channel, note.content, note.dt))
+        }
+      }
+      //      notes.foreach(note =>{
+      //        println(cnt.incrementAndGet())
+      //        noteList.getChildren.add(tile(note.channel, note.content, note.dt))
+      //      })
     }
 
     vbox
@@ -239,7 +242,7 @@ class KeeNotesFXApplication extends Application {
     HBox.setMargin(so, new Insets(10))
 
     val settingIcon = new FontIcon()
-    settingIcon.setIconLiteral("fa-gear:32:aqua")
+    settingIcon.setIconLiteral("fa-gear:21:aqua")
     makeClickable(settingIcon)
     settingIcon.setOnMouseClicked(e => {
       settings.preferencesFX.show(true)
@@ -248,7 +251,7 @@ class KeeNotesFXApplication extends Application {
     HBox.setMargin(settingIcon, new Insets(10))
 
     val sync = new FontIcon()
-    sync.setIconLiteral("fa-refresh:32:aqua")
+    sync.setIconLiteral("fa-refresh:21:aqua")
     settings.localStoreOnlyProperty.addListener(new ChangeListener[java.lang.Boolean] {
       override def changed(observable: ObservableValue[_ <: lang.Boolean], oldValue: lang.Boolean, newValue: lang.Boolean): Unit = updateStateOfSyncUI(sync, newValue)
     })
