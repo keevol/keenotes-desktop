@@ -1,18 +1,23 @@
 package com.keevol.keenotes.desk
 
-import com.keevol.javafx.controls.SimpleCard
-import com.keevol.javafx.utils.{AnchorPanes, Icons, Platforms, ScrollPanes, Stages}
+import com.keevol.javafx.utils.Platforms._
+import com.keevol.javafx.utils.{AnchorPanes, Icons, Platforms, Stages}
+import com.keevol.keenotes.KeeNoteCard
 import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable}
+import com.keevol.keenotes.desk.controls.InProgressMask
+import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.repository.NoteRepository
-import eu.hansolo.tilesfx.Tile.SkinType
-import eu.hansolo.tilesfx.TileBuilder
+import com.keevol.keenotes.desk.settings.Settings
+import com.keevol.keenotes.desk.utils.{FontStringConverter, SimpleProcessLoggerFactory}
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
+import javafx.beans.binding.Bindings
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control.{Button, Label, ScrollPane, TextArea}
 import javafx.scene.layout._
 import javafx.scene.paint.Color
-import javafx.scene.text.{Font, FontWeight}
+import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Parent, Scene}
 import javafx.stage.{Stage, StageStyle}
 import org.apache.commons.lang3.StringUtils
@@ -23,24 +28,12 @@ import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.lang
 import java.util.Date
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
-import com.keevol.javafx.utils.Platforms._
-import com.keevol.keenotes.KeeNoteCard
-import com.keevol.keenotes.desk.controls.InProgressMask
-import com.keevol.keenotes.desk.domains.Note
-import com.keevol.keenotes.desk.settings.Settings
-import com.keevol.keenotes.desk.utils.{FontStringConverter, SimpleProcessLoggerFactory}
-import javafx.beans.binding.Bindings
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.value.{ChangeListener, ObservableValue}
-import javafx.util.StringConverter
-
-import java.lang
-import java.util.concurrent.atomic.AtomicInteger
 
 
 class KeeNotesFXApplication extends Application {
@@ -70,11 +63,7 @@ class KeeNotesFXApplication extends Application {
   val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
   so.setPrefWidth(300)
   so.setLeft(Icons.SEARCH)
-  //  so.setOnKeyReleased(e => {
-  //    if (StringUtils.isNotEmpty(so.getText())) {
-  //      println("do something with: " + so.getText)
-  //    }
-  //  })
+
   val action: () => Unit = () => {
     val keyword = StringUtils.trimToEmpty(so.getText)
     noteList.getChildren.clear()
@@ -194,11 +183,6 @@ class KeeNotesFXApplication extends Application {
 
 
     val noteListWrapper = new ScrollPane(noteList)
-    //    noteListWrapper.viewportBoundsProperty().addListener((_, _, arg2) => {
-    //      val content = noteListWrapper.getContent();
-    //      noteListWrapper.setFitToWidth(content.prefWidth(-1) < arg2.getWidth());
-    //      noteListWrapper.setFitToHeight(content.prefHeight(-1) < arg2.getHeight());
-    //    })
     noteListWrapper.setFitToWidth(true)
 
     val ap = new AnchorPane(noteListWrapper)
@@ -206,16 +190,13 @@ class KeeNotesFXApplication extends Application {
     VBox.setMargin(ap, new Insets(10, 10, 5, 10))
     VBox.setVgrow(ap, Priority.ALWAYS)
     vbox.getChildren.add(ap)
-    //    VBox.setMargin(noteListWrapper, new Insets(10, 10, 5, 10))
-    //    VBox.setVgrow(noteListWrapper, Priority.ALWAYS)
-    //    vbox.getChildren.add(noteListWrapper)
 
     Future {
       val loadLimit = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
       val notes = repository.load(loadLimit)
       logger.info("note count at load: {}", notes.size)
       for (note <- notes) {
-        Platforms.ui() {
+        ui {
           noteList.getChildren.add(tile(note.channel, note.content, note.dt))
         }
       }
