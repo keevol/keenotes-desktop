@@ -6,3 +6,5 @@
 4. double-click note card will copy note content to clipboard for sharing to chat or somewhere;
 5. add share button for future extensions;
 6. since note count will not be so big to fit in the memory, we cut loose the note count for display, but you can control the minimal count via setting;
+7. setFill for scene to avoid flickering when open the window. (tip from @dlemmermann)
+

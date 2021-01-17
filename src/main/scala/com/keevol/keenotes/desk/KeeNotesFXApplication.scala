@@ -117,6 +117,7 @@ class KeeNotesFXApplication extends Application {
   def setupSceneWith(pane: Parent): Scene = {
     val scene = new Scene(pane)
     scene.getStylesheets.add("/css/style.css")
+    scene.setFill(Color.web("#464646"))
     scene
   }
 
