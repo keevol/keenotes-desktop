@@ -14,12 +14,12 @@ import javafx.application.{Application, Platform}
 import javafx.beans.binding.Bindings
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.geometry.{Insets, Pos}
-import javafx.scene.control.{Button, Label, ScrollPane, TextArea}
+import javafx.scene.control._
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Parent, Scene}
-import javafx.stage.{Stage, StageStyle}
+import javafx.stage.Stage
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.commons.lang3.time.DateFormatUtils
@@ -80,8 +80,7 @@ class KeeNotesFXApplication extends Application {
       val notes = repository.search(keyword)
       notes.map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
     } else {
-      val limitCnt = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
-      repository.load(limitCnt).map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
+      loadNoteAsPerLimit().map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
     }
   }
   so.asInstanceOf[CustomTextField].getRight.setOnMouseClicked(_ => action())
@@ -216,8 +215,7 @@ class KeeNotesFXApplication extends Application {
     vbox.getChildren.add(ap)
 
     Future {
-      val loadLimit = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
-      val notes = repository.load(loadLimit)
+      val notes = loadNoteAsPerLimit()
       logger.info("note count at load: {}", notes.size)
       for (note <- notes) {
         ui {
@@ -283,9 +281,26 @@ class KeeNotesFXApplication extends Application {
     val card = new KeeNoteCard
     card.title.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
     card.content.setText(content)
-    //        card.prefHeightProperty().bind(settings.cardPrefHeightProperty)
     card.content.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
     Bindings.bindBidirectional(settings.fontProperty, card.content.fontProperty(), fontStringConverter)
+
+    card.closeBtn.setOnAction(e => {
+      val alert = new Alert(Alert.AlertType.CONFIRMATION, "你确定？\nAre you sure to delete the note?", ButtonType.YES, ButtonType.NO)
+      alert.getDialogPane.getStylesheets.add("/css/style.css")
+      val result = alert.showAndWait().orElse(ButtonType.NO)
+      try {
+        if (ButtonType.YES.equals(result)) {
+          if (repository.delete(content, channel) > 0) {
+            noteList.getChildren.remove(card)
+            logger.info(s"delete note successfully: content=$content and channel=$channel")
+          } else {
+            logger.warn(s"删除记录失败（delete note failed）: conent=$content and channel=$channel")
+          }
+        }
+      } finally {
+        e.consume()
+      }
+    })
     card
   }
 
@@ -295,6 +310,11 @@ class KeeNotesFXApplication extends Application {
 
   def error(message: String) = {
     Notifications.create().darkStyle().title("Error").text(message).owner(primaryStage).showError()
+  }
+
+  def loadNoteAsPerLimit(): List[Note] = {
+    val limitCnt = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
+    repository.load(limitCnt)
   }
 
   def updateStateOfSyncUI(sync: FontIcon, newValue: lang.Boolean): Unit = {

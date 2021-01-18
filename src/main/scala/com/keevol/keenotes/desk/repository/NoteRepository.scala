@@ -14,9 +14,9 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.mutable.ListBuffer
 
 class NoteRepository(settings: Settings) {
-  val logger:Logger = LoggerFactory.getLogger(classOf[NoteRepository])
+  val logger: Logger = LoggerFactory.getLogger(classOf[NoteRepository])
 
-  val noteRowMapper:RowMapper[Note] = new RowMapper[Note] {
+  val noteRowMapper: RowMapper[Note] = new RowMapper[Note] {
     override def mapRow(rs: ResultSet, i: Int): Note = {
       val note = new Note()
       note.channel = rs.getString("tags")
@@ -47,7 +47,6 @@ class NoteRepository(settings: Settings) {
       |                );""".stripMargin)
 
 
-
   def load(limitCount: Int = 11): List[Note] = {
     val q = s"""select * from notes order by datetime(updated) desc limit $limitCount"""
     logger.info(s"load notes from db with sql='${q}'")
@@ -64,6 +63,11 @@ class NoteRepository(settings: Settings) {
       ps.setString(3, DateFormalizer.sqliteLocal(note.dt)) // not necessary in fact
     })
   }
+
+  def delete(content: String, ch: String): Int = executor.get().getExecutor().update("delete from notes where content=? and tags=?", (ps: PreparedStatement) => {
+    ps.setString(1, content)
+    ps.setString(2, ch)
+  })
 
   def dispose(): Unit = executor.get().dispose()
 

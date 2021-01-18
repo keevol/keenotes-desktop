@@ -23,6 +23,9 @@ public class KeeNoteCard extends StackPane {
     @FXML
     public Button shareBtn;
 
+    @FXML
+    public Button closeBtn;
+
     public KeeNoteCard() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/keenote.fxml"));
         loader.setRoot(this);
@@ -33,8 +36,12 @@ public class KeeNoteCard extends StackPane {
         shareBtn.setStyle("-fx-background-color: #464646;"); // make it transparent
         shareBtn.setTooltip(new Tooltip("Share this note."));
 
+        closeBtn.setGraphic(Icons.from("fa-close:11:aqua"));
+        closeBtn.setStyle("-fx-background-color: #464646;");
+        closeBtn.setTooltip(new Tooltip("delete the note"));
+
         content.setOnMouseClicked(event -> {
-            if(event.getClickCount() > 1) {
+            if (event.getClickCount() > 1) {
                 ClipboardContent cc = new ClipboardContent();
                 cc.putString(content.getText());
                 Clipboard.getSystemClipboard().setContent(cc);
