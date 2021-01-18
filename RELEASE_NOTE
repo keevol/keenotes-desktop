@@ -1,8 +1,2 @@
 # Release Note
 
-1. 文本输入框也可以一并根据note card的字体设置进行设置（font setting will trigger changes of Note Area, Search Area and Note Card Area simultaneously）； // feature requested by @杜仲
-2. 修复一个搜索框重置后的逻辑错误（fix a bug on search filed reset) // found by @杜仲
-3. 增加删除note选项（you can delete note from the list）；  // feature requested by @杜仲
-4. fallback to use default window handlers; // requested by @杜仲
-5. other minor polish;
-

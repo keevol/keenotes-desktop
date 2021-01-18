@@ -150,7 +150,7 @@ class KeeNotesFXApplication extends Application {
     val submit = new Button("Submit")
     makeClickable(submit)
     submit.setFont(Font.font("Arial Black", 11))
-    submit.disableProperty().bind(Bindings.createBooleanBinding(() => StringUtils.isEmpty(StringUtils.trimToEmpty(textArea.getText())), textArea.textProperty()))
+//    submit.disableProperty().bind(Bindings.createBooleanBinding(() => StringUtils.isEmpty(StringUtils.trimToEmpty(textArea.getText())), textArea.textProperty()))
     submit.setOnAction(e => {
       val content = StringUtils.trimToEmpty(textArea.getText)
       val ch = "keenotes-desktop"
