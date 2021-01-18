@@ -58,12 +58,20 @@ class KeeNotesFXApplication extends Application {
   textArea.setMinHeight(100)
   textArea.setPrefHeight(100)
   textArea.setMaxHeight(100)
+  textArea.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
+  settings.fontProperty.addListener((_, _, newValue) => {
+    textArea.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
+  })
 
   val noteList = new VBox(5)
 
   val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
   so.setPrefWidth(300)
   so.setLeft(Icons.SEARCH)
+  so.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
+  settings.fontProperty.addListener(_ => {
+    so.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
+  })
 
   val action: () => Unit = () => {
     val keyword = StringUtils.trimToEmpty(so.getText)
@@ -72,7 +80,8 @@ class KeeNotesFXApplication extends Application {
       val notes = repository.search(keyword)
       notes.map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
     } else {
-      repository.load().map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
+      val limitCnt = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
+      repository.load(limitCnt).map(note => tile(note.channel, note.content, note.dt)).foreach(noteList.getChildren.add)
     }
   }
   so.asInstanceOf[CustomTextField].getRight.setOnMouseClicked(_ => action())
@@ -109,7 +118,7 @@ class KeeNotesFXApplication extends Application {
     stage.setMaxWidth(WIDTH)
     stage.setHeight(HEIGHT)
     stage.setMinHeight(HEIGHT)
-    stage.initStyle(StageStyle.UTILITY)
+    //    stage.initStyle(StageStyle.UTILITY)
     stage.setOnCloseRequest(e => {
       logger.info("Close Request Received, start closing the application...")
       logger.info("Platform.exit()...")

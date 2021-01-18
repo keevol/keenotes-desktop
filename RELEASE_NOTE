@@ -1,6 +1,5 @@
 # Release Note
 
-1. fix bug on font default;
-2. improve search on key action;
-3. add global exception handler to help customer debug;
-
+1. 文本输入框也可以一并根据note card的字体设置进行设置（font setting will trigger changes of Note Area, Search Area and Note Card Area simultaneously）； // feature requested by @杜仲
+2. 修复一个搜索框重置后的逻辑错误（fix a bug on search filed reset) // found by @杜仲
+3.
