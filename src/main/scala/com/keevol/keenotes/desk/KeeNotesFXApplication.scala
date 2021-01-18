@@ -60,10 +60,7 @@ class KeeNotesFXApplication extends Application {
   textArea.setMaxHeight(100)
   logger.info(s"set font of note-taking field to ${settings.fontProperty.get()}")
   textArea.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-  settings.fontProperty.addListener((_, _, newValue) => {
-    logger.info(s"set font for TextArea on font change to : ${newValue}")
-    textArea.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-  })
+  textArea.fontProperty().bind(Bindings.createObjectBinding(() => fontStringConverter.fromString(settings.fontProperty.get()), settings.fontProperty))
 
   val noteList = new VBox(5)
 
