@@ -111,7 +111,10 @@ class KeeNotesFXApplication extends Application {
     stage.setMinHeight(HEIGHT)
     stage.initStyle(StageStyle.UTILITY)
     stage.setOnCloseRequest(e => {
+      logger.info("Close Request Received, start closing the application...")
+      logger.info("Platform.exit()...")
       Platform.exit()
+      logger.info("System.exit(0)...")
       System.exit(0)
     })
     stage.show()
