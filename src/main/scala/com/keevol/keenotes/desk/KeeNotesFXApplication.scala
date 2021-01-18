@@ -58,8 +58,10 @@ class KeeNotesFXApplication extends Application {
   textArea.setMinHeight(100)
   textArea.setPrefHeight(100)
   textArea.setMaxHeight(100)
+  logger.info(s"set font of note-taking field to ${settings.fontProperty.get()}")
   textArea.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
   settings.fontProperty.addListener((_, _, newValue) => {
+    logger.info(s"set font for TextArea on font change to : ${newValue}")
     textArea.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
   })
 
@@ -68,8 +70,10 @@ class KeeNotesFXApplication extends Application {
   val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
   so.setPrefWidth(300)
   so.setLeft(Icons.SEARCH)
+  logger.info(s"set font of search field to ${settings.fontProperty.get()}")
   so.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
   settings.fontProperty.addListener(_ => {
+    logger.info(s"set font for search field on font change to : ${settings.fontProperty.get()}")
     so.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
   })
 
@@ -149,7 +153,7 @@ class KeeNotesFXApplication extends Application {
     val submit = new Button("Submit")
     makeClickable(submit)
     submit.setFont(Font.font("Arial Black", 11))
-
+    submit.disableProperty().bind(Bindings.createBooleanBinding(() => StringUtils.isEmpty(StringUtils.trimToEmpty(textArea.getText())), textArea.textProperty()))
     submit.setOnAction(e => {
       val content = StringUtils.trimToEmpty(textArea.getText)
       val ch = "keenotes-desktop"
@@ -282,7 +286,10 @@ class KeeNotesFXApplication extends Application {
     card.title.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
     card.content.setText(content)
     card.content.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-    Bindings.bindBidirectional(settings.fontProperty, card.content.fontProperty(), fontStringConverter)
+    settings.fontProperty.addListener(_ => {
+      card.title.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
+      card.content.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
+    })
 
     card.closeBtn.setOnAction(e => {
       val alert = new Alert(Alert.AlertType.CONFIRMATION, "你确定？\nAre you sure to delete the note?", ButtonType.YES, ButtonType.NO)
