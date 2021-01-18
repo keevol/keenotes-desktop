@@ -21,7 +21,7 @@ class Settings {
   val syncCommandProperty = new SimpleStringProperty("")
 
   val noteDisplayLimitProperty = new SimpleIntegerProperty()
-  val fontProperty = new SimpleStringProperty("Serif")
+  val fontProperty = new SimpleStringProperty("Serif, 14.0, Regular")
 
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass,
     Category.of("KeeNotes Preferences",

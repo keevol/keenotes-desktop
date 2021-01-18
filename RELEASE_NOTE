@@ -1,2 +1,6 @@
 # Release Note
 
+1. fix bug on font default;
+2. improve search on key action;
+3. add global exception handler to help customer debug;
+

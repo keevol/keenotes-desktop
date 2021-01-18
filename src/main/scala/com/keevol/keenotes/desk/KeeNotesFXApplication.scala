@@ -1,7 +1,7 @@
 package com.keevol.keenotes.desk
 
 import com.keevol.javafx.utils.Platforms._
-import com.keevol.javafx.utils.{AnchorPanes, Icons, Platforms, Stages}
+import com.keevol.javafx.utils.{AnchorPanes, Icons, Stages}
 import com.keevol.keenotes.KeeNoteCard
 import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable}
 import com.keevol.keenotes.desk.controls.InProgressMask
@@ -28,6 +28,7 @@ import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.awt.SplashScreen
 import java.lang
 import java.util.Date
 import scala.collection.JavaConverters.mapAsScalaMapConverter
@@ -76,6 +77,18 @@ class KeeNotesFXApplication extends Application {
   }
   so.asInstanceOf[CustomTextField].getRight.setOnMouseClicked(_ => action())
   so.setOnAction(_ => action())
+  so.setOnKeyReleased(_ => {
+    if (StringUtils.isEmpty(StringUtils.trimToEmpty(so.getText()))) {
+      action()
+    }
+  })
+
+  override def init(): Unit = {
+    super.init()
+
+    if (SplashScreen.getSplashScreen != null)
+      SplashScreen.getSplashScreen.close()
+  }
 
   override def start(stage: Stage): Unit = {
     primaryStage = stage
@@ -88,7 +101,7 @@ class KeeNotesFXApplication extends Application {
 
     stage.setScene(setupSceneWith(stackPane))
     stage.setOnShown(e => textArea.requestFocus())
-    stage.setTitle("KeeNotes Desk")
+    stage.setTitle(s"KeeNotes Desk")
     val WIDTH = 400
     val HEIGHT = 600
     stage.setWidth(WIDTH)
@@ -141,7 +154,7 @@ class KeeNotesFXApplication extends Application {
           try {
             repository.insert(new Note(content = content, channel = ch, dt = new Date()))
 
-            if(!settings.localStoreOnlyProperty.get()) {
+            if (!settings.localStoreOnlyProperty.get()) {
               val r = requests.post(settings.noteRelayServerProperty.getValue,
                 headers = Map("Content-Type" -> "application/x-www-form-urlencoded"),
                 params = Map("token" -> settings.tokenProperty.getValue, "channel" -> ch, "text" -> content),
@@ -358,7 +371,11 @@ object KeeNotesFXApplication {
 }
 
 object KeeNotesFXApplicationLauncher {
+  val logger: Logger = LoggerFactory.getLogger("KeeNotesFXApplicationLauncher")
+
   def main(args: Array[String]): Unit = {
+    Thread.setDefaultUncaughtExceptionHandler((t: Thread, e: Throwable) => logger.error(s"something goes wrong in thread: ${t.getName} with exception: \n ${ExceptionUtils.getStackTrace(e)}"))
+
     KeeNotesFXApplication.main(args)
   }
 }
