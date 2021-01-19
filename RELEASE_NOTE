@@ -1,4 +1,9 @@
 # Release Note
 
-1. remove app quarantined security inconvenience by signing the dmg;
-2.
+1. sync font setting state on FontSelectorDialog show;
+2. 
+
+3. add more log for trouble-shooting;
+
+
+

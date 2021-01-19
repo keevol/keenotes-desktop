@@ -37,6 +37,7 @@ class Settings {
         Setting.of("Connect Timeout", connectTimeoutProperty),
         Setting.of("Read Timeout", readTimeoutProperty),
         Setting.of("rsync note command", syncCommandProperty)),
+
       Group.of("GUI Settings",
         Setting.of("Note Display Num.", noteDisplayLimitProperty),
         Setting.of("Font", Field.ofStringType(fontProperty).render(new SimpleFontControl()), fontProperty)

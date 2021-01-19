@@ -17,11 +17,7 @@ keenotes的桌面客户端，一个个人的闪念知识库。
 
 可以这样: `sudo xattr -d com.apple.quarantine /Applications/KeeNotes\ Desktop.app`
 
-应该是Mac的安全机制导致，可能是因为我本地编译发布，没有做认证的缘故。
-
-> TIP
-> 
-> After 1.1.6, this should not be there anymore.
+应该是Mac的安全机制导致，可能是因为我本地编译发布，没有做公证(Package Notarization)的缘故。（我不是典型的apple开发者，所以也没法做公证^_-）
 
 # 相似产品
 
