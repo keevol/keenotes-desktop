@@ -43,8 +43,12 @@ public class SplashScreenLoader extends Preloader {
     @Override
     public void handleStateChangeNotification(StateChangeNotification notification) {
         super.handleStateChangeNotification(notification);
-        logger.info("hide splash screen at StateChangeNotification: {}", notification);
-        splashScreen.hide();
+
+        if(notification.getType() == StateChangeNotification.Type.BEFORE_START) {
+            // other 2 types will be ignored and let splash there.
+            logger.info("hide splash screen at StateChangeNotification: {}", notification);
+            splashScreen.hide();
+        }
     }
 
     @Override
