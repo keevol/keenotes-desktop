@@ -1,7 +1,6 @@
 package com.keevol.keenotes.desk.settings
 
 import javafx.beans.InvalidationListener
-import javafx.scene.Node
 import javafx.scene.control.{ButtonType, Dialog}
 
 /**

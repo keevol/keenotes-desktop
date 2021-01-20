@@ -9,17 +9,20 @@ import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.repository.NoteRepository
 import com.keevol.keenotes.desk.settings.{Settings, SettingsDialog}
 import com.keevol.keenotes.desk.utils.{FontStringConverter, SimpleProcessLoggerFactory}
+import com.keevol.keenotes.splash.SplashScreenLoader
+import com.sun.javafx.application.LauncherImpl
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
 import javafx.beans.binding.Bindings
 import javafx.beans.value.{ChangeListener, ObservableValue}
+import javafx.event.{EventHandler, EventType}
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Parent, Scene}
-import javafx.stage.Stage
+import javafx.stage.{Stage, WindowEvent}
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.commons.lang3.time.DateFormatUtils
@@ -94,13 +97,6 @@ class KeeNotesFXApplication extends Application {
     }
   })
 
-  override def init(): Unit = {
-    super.init()
-
-    if (SplashScreen.getSplashScreen != null)
-      SplashScreen.getSplashScreen.close()
-  }
-
   override def start(stage: Stage): Unit = {
     primaryStage = stage
 
@@ -110,26 +106,33 @@ class KeeNotesFXApplication extends Application {
     layout.setBottom(footer())
     stackPane.getChildren.add(layout)
 
-    stage.setScene(setupSceneWith(stackPane))
-    stage.setOnShown(e => textArea.requestFocus())
-    stage.setTitle(s"KeeNotes Desk")
+    primaryStage.setScene(setupSceneWith(stackPane))
+    primaryStage.setOnShown(e => textArea.requestFocus())
+    primaryStage.setTitle(s"KeeNotes Desk")
     val WIDTH = 400
     val HEIGHT = 600
-    stage.setWidth(WIDTH)
-    stage.setMinWidth(WIDTH)
-    stage.setMaxWidth(WIDTH)
-    stage.setHeight(HEIGHT)
-    stage.setMinHeight(HEIGHT)
+    primaryStage.setWidth(WIDTH)
+    primaryStage.setMinWidth(WIDTH)
+    primaryStage.setMaxWidth(WIDTH)
+    primaryStage.setHeight(HEIGHT)
+    primaryStage.setMinHeight(HEIGHT)
     //    stage.initStyle(StageStyle.UTILITY)
-    stage.setOnCloseRequest(e => {
+
+    val closeHandler: EventHandler[WindowEvent] = e => {
       logger.info("Close Request Received, start closing the application...")
       logger.info("Platform.exit()...")
       Platform.exit()
       logger.info("System.exit(0)...")
       System.exit(0)
+    }
+
+    primaryStage.setOnCloseRequest(e => {
+      logger.info("attach close handler to primaryStage...")
+      closeHandler.handle(e)
     })
-    stage.show()
-    Stages.center(stage)
+
+    primaryStage.show()
+    Stages.center(primaryStage)
 
     CSSFX.start()
   }
@@ -406,7 +409,8 @@ object KeeNotesFXApplication {
 
 
   def main(args: Array[String]): Unit = {
-    Application.launch(classOf[KeeNotesFXApplication], args: _*)
+    //    Application.launch(classOf[KeeNotesFXApplication], args: _*)
+    LauncherImpl.launchApplication(classOf[KeeNotesFXApplication], classOf[SplashScreenLoader], args)
   }
 }
 

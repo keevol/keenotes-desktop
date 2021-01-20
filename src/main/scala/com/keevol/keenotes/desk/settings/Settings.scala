@@ -4,7 +4,6 @@ import com.dlsc.formsfx.model.structure.Field
 import com.dlsc.preferencesfx.PreferencesFx
 import com.dlsc.preferencesfx.model.{Category, Group, Setting}
 import com.dlsc.preferencesfx.view.PreferencesFxDialog
-import javafx.beans.InvalidationListener
 import javafx.beans.property.{SimpleBooleanProperty, SimpleIntegerProperty, SimpleStringProperty}
 
 /**

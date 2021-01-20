@@ -1,8 +1,9 @@
 # Release Note
 
 1. sync font setting state on FontSelectorDialog show;
-2.
-3. add more log for trouble-shooting;
+2. improve preferences setting view by introducing switch at local/remote mode;
+3. add splash screen at startup;
+4. add more log for trouble-shooting;
 
 
 

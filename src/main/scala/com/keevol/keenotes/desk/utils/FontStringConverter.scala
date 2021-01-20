@@ -14,7 +14,7 @@ class FontStringConverter extends StringConverter[Font] {
   override def toString(font: Font): String = s"${font.getFamily}, ${font.getSize}, ${font.getStyle}"
 
   override def fromString(fontString: String): Font = {
-    logger.info(s"create font from string: $fontString")
+    logger.info(s"create font from string: `$fontString`")
     val fontFamily = StringUtils.substringBefore(fontString, ",")
     val fontSize = StringUtils.substringBetween(fontString, ", ", ", ")
     val fontStyle = StringUtils.substringAfterLast(fontString, ", ")
