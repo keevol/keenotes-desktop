@@ -1,7 +1,9 @@
 package com.keevol.keenotes.desk.utils
 
 import scala.sys.process.ProcessLogger
-
+/**
+ * @author fq@keevol.com
+ */
 class SimpleProcessLoggerFactory {
   val output = new StringBuilder
   val error = new StringBuilder

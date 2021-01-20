@@ -12,7 +12,9 @@ import java.sql.{PreparedStatement, ResultSet}
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.mutable.ListBuffer
-
+/**
+ * @author fq@keevol.com
+ */
 class NoteRepository(settings: Settings) {
   val logger: Logger = LoggerFactory.getLogger(classOf[NoteRepository])
 

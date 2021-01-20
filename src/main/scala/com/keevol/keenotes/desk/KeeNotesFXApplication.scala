@@ -36,7 +36,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
 
-
+/**
+ * @author fq@keevol.com
+ */
 class KeeNotesFXApplication extends Application {
 
   val logger: Logger = LoggerFactory.getLogger(classOf[KeeNotesFXApplication])

@@ -7,7 +7,9 @@ import javafx.scene.control.{Label, ProgressBar}
 import javafx.scene.layout.{AnchorPane, VBox}
 import javafx.scene.paint.Color
 import javafx.stage.{Modality, Stage, StageStyle}
-
+/**
+ * @author fq@keevol.com
+ */
 class InProgressMask extends Stage {
   val layout = new VBox(10)
   layout.setPadding(new Insets(10))

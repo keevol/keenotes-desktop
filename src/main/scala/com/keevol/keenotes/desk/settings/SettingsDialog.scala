@@ -2,7 +2,9 @@ package com.keevol.keenotes.desk.settings
 
 import javafx.scene.Node
 import javafx.scene.control.{ButtonType, Dialog}
-
+/**
+ * @author fq@keevol.com
+ */
 class SettingsDialog extends Dialog {
 
   setTitle("Settings")

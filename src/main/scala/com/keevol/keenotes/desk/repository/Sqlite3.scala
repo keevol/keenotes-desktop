@@ -4,7 +4,9 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.springframework.jdbc.core.JdbcTemplate
 
 import java.io.File
-
+/**
+ * @author fq@keevol.com
+ */
 class Sqlite3(location: File) {
 
   private val config: HikariConfig = new HikariConfig()
