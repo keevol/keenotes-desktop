@@ -3,7 +3,7 @@ package com.keevol.keenotes.desk
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.javafx.utils.{AnchorPanes, Icons, Stages}
 import com.keevol.keenotes.KeeNoteCard
-import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable}
+import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable, version}
 import com.keevol.keenotes.desk.controls.InProgressMask
 import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.repository.NoteRepository
@@ -15,7 +15,7 @@ import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
 import javafx.beans.binding.Bindings
 import javafx.beans.value.{ChangeListener, ObservableValue}
-import javafx.event.{EventHandler, EventType}
+import javafx.event.EventHandler
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
 import javafx.scene.layout._
@@ -31,9 +31,9 @@ import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.awt.SplashScreen
 import java.lang
 import java.util.Date
+import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -108,7 +108,8 @@ class KeeNotesFXApplication extends Application {
 
     primaryStage.setScene(setupSceneWith(stackPane))
     primaryStage.setOnShown(e => textArea.requestFocus())
-    primaryStage.setTitle(s"KeeNotes Desk")
+    val versionString = if (StringUtils.isEmpty(StringUtils.trimToEmpty(version.get()))) "" else s"(${version.get()})"
+    primaryStage.setTitle(s"KeeNotes Desk$versionString")
     val WIDTH = 400
     val HEIGHT = 600
     primaryStage.setWidth(WIDTH)
@@ -379,6 +380,9 @@ class KeeNotesFXApplication extends Application {
 
 object KeeNotesFXApplication {
 
+  val version: AtomicReference[String] = new AtomicReference[String]()
+
+
   def makeClickable(node: Node) = {
     node.setOnMouseEntered(e => {
       node.getScene.setCursor(Cursor.HAND)
@@ -419,6 +423,9 @@ object KeeNotesFXApplicationLauncher {
 
   def main(args: Array[String]): Unit = {
     Thread.setDefaultUncaughtExceptionHandler((t: Thread, e: Throwable) => logger.error(s"something goes wrong in thread: ${t.getName} with exception: \n ${ExceptionUtils.getStackTrace(e)}"))
+
+    logger.info(s"""set -Dkeenotes.desk.version(Property)=${System.getProperty("keenotes.desk.version")} to window title""")
+    KeeNotesFXApplication.version.set(System.getProperty("keenotes.desk.version"))
 
     KeeNotesFXApplication.main(args)
   }

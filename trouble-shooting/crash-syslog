@@ -1,0 +1,13 @@
+Jan 20 18:52:53 fq16 com.apple.xpc.launchd[1]: Coalition Cache Evicted: app<application.jd.jd-gui.28874189.28874198(501)> [111717]
+Jan 20 18:52:56 fq16 com.apple.xpc.launchd[1] (application.com.keevol.keenotes.desk.28908995.28909011[78576]): Service exited with abnormal code: 1
+Jan 20 18:52:56 fq16 Google Chrome Helper[1921]: Libnotify: notify_register_coalesced_registration failed with code 9 on line 2835
+Jan 20 18:53:51 fq16 com.apple.xpc.launchd[1]: Coalition Cache Hit: app<application.com.apple.DiskImageMounter.1152921500312151719.1152921500312151724(501)> [112814]
+Jan 20 18:53:53 fq16 com.apple.xpc.launchd[1]: Coalition Cache Evicted: app<application.org.bbg.prefs.27607976.27607984(501)> [111682]
+Jan 20 18:53:56 fq16 com.apple.xpc.launchd[1] (application.com.keevol.keenotes.desk.18.21[78600]): Service exited with abnormal code: 1
+Jan 20 18:53:56 fq16 Google Chrome Helper[1921]: Libnotify: notify_register_coalesced_registration failed with code 9 on line 2835
+
+// 传递错误的--java-options导致。
+
+
+
+
