@@ -1,11 +1,13 @@
 package com.keevol.keenotes.desk.settings
 
+import javafx.beans.InvalidationListener
 import javafx.scene.Node
 import javafx.scene.control.{ButtonType, Dialog}
+
 /**
  * @author fq@keevol.com
  */
-class SettingsDialog extends Dialog {
+class SettingsDialog(settings: Settings) extends Dialog {
 
   setTitle("Settings")
 
@@ -14,8 +16,14 @@ class SettingsDialog extends Dialog {
 
   dp.getStylesheets.add("/css/style.css")
 
-  def setContent(content: Node) = {
-    dp.setContent(content)
+  val switchListener: InvalidationListener = _ => {
+    if (settings.localStoreOnlyProperty.get()) {
+      dp.setContent(settings.preferencesFXLocal.getView)
+    } else {
+      dp.setContent(settings.preferencesFX.getView)
+    }
   }
+  settings.localStoreOnlyProperty.addListener(switchListener)
+  switchListener.invalidated(settings.localStoreOnlyProperty)
 
 }

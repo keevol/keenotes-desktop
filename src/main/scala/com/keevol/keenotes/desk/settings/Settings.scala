@@ -25,9 +25,14 @@ class Settings {
   val fontProperty = new SimpleStringProperty("Serif, 14.0, Regular")
 
 
-  val basicGroup: Group = Group.of("Keenotes Local Configuration",
+  val basicGroup: Group = Group.of("KeeNotes Local Configuration",
     Setting.of("Local Store Only", localStoreOnlyProperty),
-    Setting.of("Keenotes Sqlite", sqliteFileProperty),
+    Setting.of("KeeNotes Sqlite", sqliteFileProperty),
+  )
+
+  val basicGroupLocal: Group = Group.of("KeeNotes Local Configuration",
+    Setting.of("Local Store Only", localStoreOnlyProperty),
+    Setting.of("KeeNotes Sqlite", sqliteFileProperty),
   )
 
   val remoteGroup: Group = Group.of("Remote Relay Server Configuration",
@@ -41,8 +46,13 @@ class Settings {
     Setting.of("Note Display Num.", noteDisplayLimitProperty),
     Setting.of("Font", Field.ofStringType(fontProperty).render(new SimpleFontControl()), fontProperty)
   )
+  val uiGroupLocal: Group = Group.of("GUI Settings",
+    Setting.of("Note Display Num.", noteDisplayLimitProperty),
+    Setting.of("Font", Field.ofStringType(fontProperty).render(new SimpleFontControl()), fontProperty)
+  )
 
   val category: Category = Category.of("KeeNotes Preferences", basicGroup, uiGroup, remoteGroup)
+  val categoryLocal: Category = Category.of("KeeNotes Preferences", basicGroupLocal, uiGroupLocal)
 
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass, category)
     .buttonsVisibility(true)
@@ -50,7 +60,14 @@ class Settings {
     .instantPersistent(true)
     .saveSettings(true)
 
+  val preferencesFXLocal: PreferencesFx = PreferencesFx.of(getClass, categoryLocal)
+    .buttonsVisibility(true)
+    .debugHistoryMode(true)
+    .instantPersistent(true)
+    .saveSettings(true)
+
   attachCss(preferencesFX)
+  attachCss(preferencesFXLocal)
 
   def attachCss(pref: PreferencesFx): Unit = {
     val f = pref.getClass.getDeclaredField("preferencesFxDialog")

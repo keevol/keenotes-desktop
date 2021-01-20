@@ -7,7 +7,7 @@ import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonCli
 import com.keevol.keenotes.desk.controls.InProgressMask
 import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.repository.NoteRepository
-import com.keevol.keenotes.desk.settings.Settings
+import com.keevol.keenotes.desk.settings.{Settings, SettingsDialog}
 import com.keevol.keenotes.desk.utils.{FontStringConverter, SimpleProcessLoggerFactory}
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
@@ -246,7 +246,9 @@ class KeeNotesFXApplication extends Application {
     settingIcon.setIconLiteral("fa-gear:21:aqua")
     makeClickable(settingIcon)
     settingIcon.setOnMouseClicked(e => {
-      settings.preferencesFX.show(true)
+      //      settings.preferencesFX.show(true)
+      val dialog = new SettingsDialog(settings)
+      dialog.show()
     })
 
     HBox.setMargin(settingIcon, new Insets(10))
