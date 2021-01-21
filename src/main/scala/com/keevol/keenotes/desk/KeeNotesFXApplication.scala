@@ -4,7 +4,7 @@ import com.jfoenix.controls.JFXButton
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.javafx.utils.{AnchorPanes, Icons, Stages}
 import com.keevol.keenotes.KeeNoteCard
-import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, makeNonClickable, version}
+import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, version}
 import com.keevol.keenotes.desk.controls.InProgressMask
 import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.repository.NoteRepository
@@ -15,7 +15,7 @@ import com.sun.javafx.application.LauncherImpl
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
 import javafx.beans.binding.Bindings
-import javafx.beans.value.{ChangeListener, ObservableValue}
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
@@ -29,10 +29,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.{CustomTextField, TextFields}
-import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.lang
 import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters.mapAsScalaMapConverter
@@ -53,6 +51,7 @@ class KeeNotesFXApplication extends Application {
   val repository = new NoteRepository(settings)
 
   val mask = new InProgressMask
+  val inProgressProperty = new SimpleBooleanProperty(false)
 
   var primaryStage: Stage = _
 
@@ -157,7 +156,7 @@ class KeeNotesFXApplication extends Application {
     val submit = new Button("Submit")
     makeClickable(submit)
     submit.setFont(Font.font("Arial Black", 11))
-    //    submit.disableProperty().bind(Bindings.createBooleanBinding(() => StringUtils.isEmpty(StringUtils.trimToEmpty(textArea.getText())), textArea.textProperty()))
+    submit.disableProperty().bind(Bindings.createBooleanBinding(() => StringUtils.isEmpty(StringUtils.trimToEmpty(textArea.getText())), textArea.textProperty()).or(inProgressProperty))
     submit.setOnAction(e => {
       val content = StringUtils.trimToEmpty(textArea.getText)
       val ch = "keenotes-desktop"
@@ -167,7 +166,8 @@ class KeeNotesFXApplication extends Application {
         Stages.center(mask, primaryStage)
 
         textArea.setEditable(false)
-        submit.setDisable(true)
+        //        submit.setDisable(true)
+        inProgressProperty.set(true)
         submit.getScene.setCursor(Cursor.WAIT)
         Future {
           try {
@@ -198,7 +198,8 @@ class KeeNotesFXApplication extends Application {
           } finally {
             Platform.runLater(() => {
               textArea.setEditable(true)
-              submit.setDisable(false)
+              //              submit.setDisable(false)
+              inProgressProperty.set(false)
               submit.getScene.setCursor(Cursor.DEFAULT)
               mask.close()
             })
@@ -248,18 +249,19 @@ class KeeNotesFXApplication extends Application {
     HBox.setMargin(so, new Insets(10, 0, 10, 10))
 
     val sync = new JFXButton("", Icons.from("fa-refresh:21:aqua"))
-    sync.disableProperty().bind(settings.localStoreOnlyProperty)
+    sync.disableProperty().bind(settings.localStoreOnlyProperty.or(inProgressProperty))
     sync.setOnMouseClicked(e => {
+
       val processLogger = new SimpleProcessLoggerFactory
 
       mask.setWidth(400)
       mask.show()
       Stages.center(mask, primaryStage)
 
-      //      sync.setIconColor(Color.GRAY)
-
+      inProgressProperty.set(true)
       sync.getScene.setCursor(Cursor.WAIT)
       Future {
+
         try {
           if (StringUtils.isEmpty(StringUtils.trimToEmpty(settings.syncCommandProperty.get()))) throw new IllegalArgumentException(s"bad sync command: ${settings.syncCommandProperty}")
           val exitCode = Process(Seq("bash", "-c", settings.syncCommandProperty.get()), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
@@ -277,8 +279,8 @@ class KeeNotesFXApplication extends Application {
           }
         } finally {
           Platform.runLater(() => {
+            inProgressProperty.set(false)
             sync.getScene.setCursor(Cursor.DEFAULT)
-            //            sync.setIconColor(Color.AQUA)
             mask.close()
           })
         }
