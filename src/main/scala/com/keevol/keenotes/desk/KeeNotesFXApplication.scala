@@ -14,7 +14,7 @@ import com.keevol.keenotes.splash.SplashScreenLoader
 import com.sun.javafx.application.LauncherImpl
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
-import javafx.beans.binding.Bindings
+import javafx.beans.binding.{Bindings, ObjectBinding}
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
 import javafx.geometry.{Insets, Pos}
@@ -47,6 +47,7 @@ class KeeNotesFXApplication extends Application {
 
   val settings = new Settings()
   val fontStringConverter = new FontStringConverter()
+  val noteFontProperty: ObjectBinding[Font] = Bindings.createObjectBinding(() => fontStringConverter.fromString(settings.fontProperty.get()), settings.fontProperty)
 
   val repository = new NoteRepository(settings)
 
@@ -63,21 +64,16 @@ class KeeNotesFXApplication extends Application {
   textArea.setMinHeight(100)
   textArea.setPrefHeight(100)
   textArea.setMaxHeight(100)
-  logger.info(s"set font of note-taking field to ${settings.fontProperty.get()}")
-  textArea.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-  textArea.fontProperty().bind(Bindings.createObjectBinding(() => fontStringConverter.fromString(settings.fontProperty.get()), settings.fontProperty))
+  logger.info(s"sync font of note-taking field to ${settings.fontProperty.get()}")
+  textArea.fontProperty().bind(noteFontProperty)
 
   val noteList = new VBox(5)
 
   val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
   so.setPrefWidth(300)
   so.setLeft(Icons.SEARCH)
-  logger.info(s"set font of search field to ${settings.fontProperty.get()}")
-  so.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-  settings.fontProperty.addListener(_ => {
-    logger.info(s"set font for search field on font change to : ${settings.fontProperty.get()}")
-    so.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-  })
+  logger.info(s"sync font of search field to ${settings.fontProperty.get()}")
+  so.fontProperty().bind(noteFontProperty)
 
   val action: () => Unit = () => {
     val keyword = StringUtils.trimToEmpty(so.getText)
@@ -324,12 +320,9 @@ class KeeNotesFXApplication extends Application {
   def tile(channel: String, content: String, dt: Date = new Date()) = {
     val card = new KeeNoteCard
     card.title.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
+    card.title.fontProperty().bind(noteFontProperty)
     card.content.setText(content)
-    card.content.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-    settings.fontProperty.addListener(_ => {
-      card.title.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-      card.content.setFont(fontStringConverter.fromString(settings.fontProperty.get()))
-    })
+    card.content.fontProperty().bind(noteFontProperty)
 
     card.closeBtn.setOnAction(e => {
       val alert = new Alert(Alert.AlertType.CONFIRMATION, "你确定？\nAre you sure to delete the note?", ButtonType.YES, ButtonType.NO)
