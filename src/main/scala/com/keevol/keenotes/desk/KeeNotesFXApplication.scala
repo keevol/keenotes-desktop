@@ -1,5 +1,6 @@
 package com.keevol.keenotes.desk
 
+import com.jfoenix.controls.JFXButton
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.javafx.utils.{AnchorPanes, Icons, Stages}
 import com.keevol.keenotes.KeeNoteCard
@@ -241,30 +242,62 @@ class KeeNotesFXApplication extends Application {
   }
 
   def header() = {
-    val hbox = new HBox(10)
+    val hbox = new HBox(3)
     hbox.setAlignment(Pos.CENTER)
 
-    HBox.setMargin(so, new Insets(10))
+    HBox.setMargin(so, new Insets(10, 0, 10, 10))
 
-    val settingIcon = new FontIcon()
-    settingIcon.setIconLiteral("fa-gear:21:aqua")
-    makeClickable(settingIcon)
-    settingIcon.setOnMouseClicked(e => {
-      //      settings.preferencesFX.show(true)
+    val sync = new JFXButton("", Icons.from("fa-refresh:21:aqua"))
+    sync.disableProperty().bind(settings.localStoreOnlyProperty)
+    sync.setOnMouseClicked(e => {
+      val processLogger = new SimpleProcessLoggerFactory
+
+      mask.setWidth(400)
+      mask.show()
+      Stages.center(mask, primaryStage)
+
+      //      sync.setIconColor(Color.GRAY)
+
+      sync.getScene.setCursor(Cursor.WAIT)
+      Future {
+        try {
+          if (StringUtils.isEmpty(StringUtils.trimToEmpty(settings.syncCommandProperty.get()))) throw new IllegalArgumentException(s"bad sync command: ${settings.syncCommandProperty}")
+          val exitCode = Process(Seq("bash", "-c", settings.syncCommandProperty.get()), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
+          exitCode match {
+            case 0 => Platform.runLater(() => info("Note Synced Successfully."))
+            case _ => {
+              Platform.runLater(() => error(s"something goes wrong with exit code=$exitCode, check log for more information."))
+              logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+            }
+          }
+        } catch {
+          case t: Throwable => {
+            Platform.runLater(() => error(s"something goes wrong with exception thrown, check log for more information."))
+            logger.error(ExceptionUtils.getStackTrace(t) + "\n" + processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
+          }
+        } finally {
+          Platform.runLater(() => {
+            sync.getScene.setCursor(Cursor.DEFAULT)
+            //            sync.setIconColor(Color.AQUA)
+            mask.close()
+          })
+        }
+      }
+    })
+
+    val stats = new JFXButton("", Icons.from("fa-bar-chart:21:aqua"))
+    stats.setOnAction(e => {
+      // TODO add analysis to notes
+    })
+
+    val settingBtn = new JFXButton("", Icons.from("fa-gear:21:aqua"))
+    settingBtn.setOnAction(e => {
       val dialog = new SettingsDialog(settings)
       dialog.show()
     })
+    HBox.setMargin(settingBtn, new Insets(10, 10, 10, 0))
 
-    HBox.setMargin(settingIcon, new Insets(10))
-
-    val sync = new FontIcon()
-    sync.setIconLiteral("fa-refresh:21:aqua")
-    settings.localStoreOnlyProperty.addListener(new ChangeListener[java.lang.Boolean] {
-      override def changed(observable: ObservableValue[_ <: lang.Boolean], oldValue: lang.Boolean, newValue: lang.Boolean): Unit = updateStateOfSyncUI(sync, newValue)
-    })
-    updateStateOfSyncUI(sync, settings.localStoreOnlyProperty.get())
-
-    hbox.getChildren.addAll(so, placeholder(), sync, settingIcon)
+    hbox.getChildren.addAll(so, placeholder(), sync, stats, settingBtn)
 
     hbox
   }
@@ -328,52 +361,6 @@ class KeeNotesFXApplication extends Application {
     val limitCnt = if (settings.noteDisplayLimitProperty.get() < 1) Int.MaxValue else settings.noteDisplayLimitProperty.get()
     repository.load(limitCnt)
   }
-
-  def updateStateOfSyncUI(sync: FontIcon, newValue: lang.Boolean): Unit = {
-    if (newValue) {
-      sync.setIconColor(Color.GREY)
-      makeNonClickable(sync)
-      sync.setOnMouseClicked(null)
-    } else {
-      sync.setIconColor(Color.AQUA)
-      makeClickable(sync)
-      sync.setOnMouseClicked(e => {
-        val processLogger = new SimpleProcessLoggerFactory
-
-        mask.setWidth(400)
-        mask.show()
-        Stages.center(mask, primaryStage)
-
-        sync.setIconColor(Color.GRAY)
-        sync.getScene.setCursor(Cursor.WAIT)
-        Future {
-          try {
-            if (StringUtils.isEmpty(StringUtils.trimToEmpty(settings.syncCommandProperty.get()))) throw new IllegalArgumentException(s"bad sync command: ${settings.syncCommandProperty}")
-            val exitCode = Process(Seq("bash", "-c", settings.syncCommandProperty.get()), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
-            exitCode match {
-              case 0 => Platform.runLater(() => info("Note Synced Successfully."))
-              case _ => {
-                Platform.runLater(() => error(s"something goes wrong with exit code=$exitCode, check log for more information."))
-                logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
-              }
-            }
-          } catch {
-            case t: Throwable => {
-              Platform.runLater(() => error(s"something goes wrong with exception thrown, check log for more information."))
-              logger.error(ExceptionUtils.getStackTrace(t) + "\n" + processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
-            }
-          } finally {
-            Platform.runLater(() => {
-              sync.getScene.setCursor(Cursor.DEFAULT)
-              sync.setIconColor(Color.AQUA)
-              mask.close()
-            })
-          }
-        }
-      })
-    }
-  }
-
 
 }
 

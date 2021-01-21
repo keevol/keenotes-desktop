@@ -64,7 +64,7 @@
 /* JFoenix related style*/
 .jfx-button {
     -jfx-button-type: FLAT;
-    /*-fx-background-color: aqua;*/
+    -fx-background-color: rgb(50, 50, 50);
     -fx-text-fill: white;
 }
 
