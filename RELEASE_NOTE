@@ -1,5 +1,7 @@
 # Release Note
 
+- add logo to window
+- add resource bundles for different locale users
 - 增加分析大盘UI入口（功能有待实现）；
 - 优化font setting of card， 使用同一个fontProperty和font instance；
 - clean up code by using more javafx Bindings facility；

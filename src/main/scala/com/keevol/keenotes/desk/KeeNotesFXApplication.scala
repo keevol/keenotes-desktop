@@ -19,7 +19,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
-import javafx.scene.image.Image
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -32,8 +31,8 @@ import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.util.{Date, Locale, ResourceBundle}
 import java.util.concurrent.atomic.AtomicReference
+import java.util.{Date, Locale, ResourceBundle}
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -48,7 +47,7 @@ class KeeNotesFXApplication extends Application {
   val defaultFont: Font = Font.font("Trebuchet MS")
   val texts:ResourceBundle = ResourceBundle.getBundle("bundles/gui", Locale.getDefault)
 
-  val settings = new Settings()
+  val settings = new Settings(texts)
   val fontStringConverter = new FontStringConverter()
   val noteFontProperty: ObjectBinding[Font] = Bindings.createObjectBinding(() => fontStringConverter.fromString(settings.fontProperty.get()), settings.fontProperty)
 
@@ -153,7 +152,7 @@ class KeeNotesFXApplication extends Application {
     VBox.setMargin(textArea, new Insets(0, 10, 10, 10))
     vbox.getChildren.add(textArea)
 
-    val submit = new Button(texts.getString("submit"))
+    val submit = new Button(texts.getString("button.submit"))
     makeClickable(submit)
     submit.setFont(defaultFont)
     submit.disableProperty().bind(Bindings.createBooleanBinding(() => StringUtils.isEmpty(StringUtils.trimToEmpty(textArea.getText())), textArea.textProperty()).or(inProgressProperty))

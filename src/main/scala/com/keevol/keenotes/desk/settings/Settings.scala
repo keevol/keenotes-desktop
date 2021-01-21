@@ -6,10 +6,12 @@ import com.dlsc.preferencesfx.model.{Category, Group, Setting}
 import com.dlsc.preferencesfx.view.PreferencesFxDialog
 import javafx.beans.property.{SimpleBooleanProperty, SimpleIntegerProperty, SimpleStringProperty}
 
+import java.util.ResourceBundle
+
 /**
  * @author fq@keevol.com
  */
-class Settings {
+class Settings(texts: ResourceBundle) {
 
   val localStoreOnlyProperty = new SimpleBooleanProperty(true)
   val sqliteFileProperty = new SimpleStringProperty(s"${System.getProperty("user.home")}/keenotes.sqlite3")
@@ -24,9 +26,9 @@ class Settings {
   val fontProperty = new SimpleStringProperty("Serif, 14.0, Regular")
 
 
-  val basicGroup: Group = Group.of("KeeNotes Local Configuration",
-    Setting.of("Local Store Only", localStoreOnlyProperty),
-    Setting.of("KeeNotes Sqlite", sqliteFileProperty),
+  val basicGroup: Group = Group.of(texts.getString("label.local.config"),
+    Setting.of(texts.getString("label.local.mode"), localStoreOnlyProperty),
+    Setting.of(texts.getString("label.sqlite.location"), sqliteFileProperty),
   )
 
   val basicGroupLocal: Group = Group.of("KeeNotes Local Configuration",

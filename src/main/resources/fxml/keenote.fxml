@@ -18,7 +18,7 @@
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
          <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="20.0" spacing="5.0">
+            <HBox alignment="CENTER_LEFT" prefHeight="20.0">
                <children>
                   <Label fx:id="title" style="-fx-text-fill: aqua;" text="title" >
                      <font>
@@ -26,12 +26,12 @@
                      </font>
                   </Label>
                   <Region HBox.hgrow="ALWAYS"></Region>
-                  <Button fx:id="shareBtn" alignment="CENTER_RIGHT" mnemonicParsing="false" text="">
+                  <Button fx:id="shareBtn" alignment="CENTER_RIGHT" mnemonicParsing="false">
                      <font>
                         <Font size="11.0" />
                      </font>
                   </Button>
-                  <Button fx:id="closeBtn" alignment="CENTER_RIGHT" mnemonicParsing="false" text="">
+                  <Button fx:id="closeBtn" alignment="CENTER_RIGHT" mnemonicParsing="false">
                      <font>
                         <Font size="11.0" />
                      </font>
