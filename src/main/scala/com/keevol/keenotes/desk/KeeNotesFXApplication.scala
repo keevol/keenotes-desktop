@@ -2,7 +2,7 @@ package com.keevol.keenotes.desk
 
 import com.jfoenix.controls.JFXButton
 import com.keevol.javafx.utils.Platforms._
-import com.keevol.javafx.utils.{AnchorPanes, Icons, Stages}
+import com.keevol.javafx.utils.{AnchorPanes, Icons, Images, Stages}
 import com.keevol.keenotes.KeeNoteCard
 import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, version}
 import com.keevol.keenotes.desk.controls.InProgressMask
@@ -19,6 +19,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
+import javafx.scene.image.Image
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -31,7 +32,7 @@ import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.util.Date
+import java.util.{Date, Locale, ResourceBundle}
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,6 +45,8 @@ import scala.sys.process.Process
 class KeeNotesFXApplication extends Application {
 
   val logger: Logger = LoggerFactory.getLogger(classOf[KeeNotesFXApplication])
+  val defaultFont: Font = Font.font("Trebuchet MS")
+  val texts:ResourceBundle = ResourceBundle.getBundle("bundles/gui", Locale.getDefault)
 
   val settings = new Settings()
   val fontStringConverter = new FontStringConverter()
@@ -72,8 +75,8 @@ class KeeNotesFXApplication extends Application {
   val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
   so.setPrefWidth(300)
   so.setLeft(Icons.SEARCH)
-  logger.info(s"sync font of search field to ${settings.fontProperty.get()}")
-  so.fontProperty().bind(noteFontProperty)
+  //  logger.info(s"sync font of search field to ${settings.fontProperty.get()}")
+  //  so.fontProperty().bind(noteFontProperty)
 
   val action: () => Unit = () => {
     val keyword = StringUtils.trimToEmpty(so.getText)
@@ -106,6 +109,7 @@ class KeeNotesFXApplication extends Application {
     primaryStage.setOnShown(e => textArea.requestFocus())
     val versionString = if (StringUtils.isEmpty(StringUtils.trimToEmpty(version.get()))) "" else s"(${version.get()})"
     primaryStage.setTitle(s"KeeNotes Desk$versionString")
+    primaryStage.getIcons.add(Images.from("/images/logo.png"))
     val WIDTH = 400
     val HEIGHT = 600
     primaryStage.setWidth(WIDTH)
@@ -149,9 +153,9 @@ class KeeNotesFXApplication extends Application {
     VBox.setMargin(textArea, new Insets(0, 10, 10, 10))
     vbox.getChildren.add(textArea)
 
-    val submit = new Button("Submit")
+    val submit = new Button(texts.getString("submit"))
     makeClickable(submit)
-    submit.setFont(Font.font("Arial Black", 11))
+    submit.setFont(defaultFont)
     submit.disableProperty().bind(Bindings.createBooleanBinding(() => StringUtils.isEmpty(StringUtils.trimToEmpty(textArea.getText())), textArea.textProperty()).or(inProgressProperty))
     submit.setOnAction(e => {
       val content = StringUtils.trimToEmpty(textArea.getText)
@@ -311,7 +315,7 @@ class KeeNotesFXApplication extends Application {
     HBox.setHgrow(placeholder2, Priority.ALWAYS)
 
     val copyright = new Label("© KEEVOL Consulting @keevol.com")
-    copyright.setFont(Font.font("Arial Black", 9))
+    copyright.setFont(defaultFont)
     hbox.getChildren.addAll(placeholder1, copyright, placeholder2)
     HBox.setMargin(copyright, new Insets(3))
     hbox
@@ -320,7 +324,7 @@ class KeeNotesFXApplication extends Application {
   def tile(channel: String, content: String, dt: Date = new Date()) = {
     val card = new KeeNoteCard
     card.title.setText(channel + s"@${DateFormatUtils.format(dt, "yyyy-MM-dd HH:mm:ss")}")
-    card.title.fontProperty().bind(noteFontProperty)
+    //    card.title.fontProperty().bind(noteFontProperty)
     card.content.setText(content)
     card.content.fontProperty().bind(noteFontProperty)
 
