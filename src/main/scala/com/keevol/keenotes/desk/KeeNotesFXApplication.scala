@@ -1,6 +1,6 @@
 package com.keevol.keenotes.desk
 
-import animatefx.animation.FlipInY
+import animatefx.animation.{FadeInUp, FlipInY, LightSpeedIn}
 import com.jfoenix.controls.JFXButton
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.javafx.utils.{AnchorPanes, Icons, Images, Stages}
@@ -26,6 +26,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Parent, Scene}
 import javafx.stage.{Stage, WindowEvent}
+import javafx.util.Duration
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.commons.lang3.time.DateFormatUtils
@@ -252,13 +253,20 @@ class KeeNotesFXApplication extends Application {
     VBox.setVgrow(ap, Priority.ALWAYS)
     vbox.getChildren.add(ap)
 
+    noteListWrapper.setContent(new CenterLabel("Loading...", true, 52))
+
     Future {
+
       val notes = loadNoteAsPerLimit()
       logger.info("note count at load: {}", notes.size)
       for (note <- notes) {
         ui {
           noteList.getChildren.add(tile(note.channel, note.content, note.dt))
         }
+      }
+
+      ui {
+        noteListWrapper.setContent(noteList)
       }
     }
 

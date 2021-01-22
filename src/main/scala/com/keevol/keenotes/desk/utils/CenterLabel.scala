@@ -4,8 +4,9 @@ import animatefx.animation.Bounce
 import javafx.geometry.Insets
 import javafx.scene.control.Label
 import javafx.scene.layout.{HBox, Priority, Region}
+import javafx.scene.text.Font
 
-class CenterLabel(text: String, dynamicBounce: Boolean = false) extends HBox {
+class CenterLabel(text: String, dynamicBounce: Boolean = false, fontSize: Int = 11) extends HBox {
   //  setStyle("-fx-background-color: #494949;")
 
   val placeholder1 = new Region
@@ -15,6 +16,7 @@ class CenterLabel(text: String, dynamicBounce: Boolean = false) extends HBox {
   HBox.setHgrow(placeholder2, Priority.ALWAYS)
 
   val l = new Label(text)
+  l.setFont(Font.font(fontSize))
   getChildren.addAll(placeholder1, l, placeholder2)
   HBox.setMargin(l, new Insets(3))
 
