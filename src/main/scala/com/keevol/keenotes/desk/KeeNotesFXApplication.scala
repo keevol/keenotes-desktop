@@ -253,7 +253,7 @@ class KeeNotesFXApplication extends Application {
     VBox.setVgrow(ap, Priority.ALWAYS)
     vbox.getChildren.add(ap)
 
-    noteListWrapper.setContent(new CenterLabel("Loading...", true, 52))
+    noteListWrapper.setContent(new CenterLabel(texts.getString("text.loading.message"), true, 52))
 
     Future {
 
@@ -266,6 +266,7 @@ class KeeNotesFXApplication extends Application {
       }
 
       ui {
+        new FadeInUp(noteList).setSpeed(0.5).play()
         noteListWrapper.setContent(noteList)
       }
     }
