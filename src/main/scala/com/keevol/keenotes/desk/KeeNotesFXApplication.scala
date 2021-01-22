@@ -1,5 +1,6 @@
 package com.keevol.keenotes.desk
 
+import animatefx.animation.{Bounce, GlowText, SlideInRight}
 import com.jfoenix.controls.JFXButton
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.javafx.utils.{AnchorPanes, Icons, Images, Stages}
@@ -9,7 +10,7 @@ import com.keevol.keenotes.desk.controls.InProgressMask
 import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.repository.NoteRepository
 import com.keevol.keenotes.desk.settings.Settings
-import com.keevol.keenotes.desk.utils.FontStringConverter
+import com.keevol.keenotes.desk.utils.{CenterLabel, FontStringConverter}
 import com.keevol.keenotes.splash.SplashScreenLoader
 import com.sun.javafx.application.LauncherImpl
 import fr.brouillard.oss.cssfx.CSSFX
@@ -20,6 +21,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout._
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -60,8 +62,9 @@ class KeeNotesFXApplication extends Application {
   val inProgressProperty = new SimpleBooleanProperty(false)
 
   var primaryStage: Stage = _
-
-  val stackPane = new StackPane()
+  var primaryScene: Scene = _
+  var preferenceScene: Scene = _
+  var insightScene: Scene = _
 
   val textArea = new TextArea()
   textArea.setWrapText(true)
@@ -99,13 +102,11 @@ class KeeNotesFXApplication extends Application {
   override def start(stage: Stage): Unit = {
     primaryStage = stage
 
-    val layout = new BorderPane()
-    layout.setTop(header())
-    layout.setCenter(notePane())
-    layout.setBottom(footer())
-    stackPane.getChildren.add(layout)
+    primaryScene = setupPrimaryScene()
+    preferenceScene = setupPreferenceScene()
+    insightScene = setupInsightScene()
 
-    primaryStage.setScene(setupSceneWith(stackPane))
+    primaryStage.setScene(primaryScene)
     primaryStage.setOnShown(e => textArea.requestFocus())
     val versionString = if (StringUtils.isEmpty(StringUtils.trimToEmpty(version.get()))) "" else s"(${version.get()})"
     primaryStage.setTitle(s"KeeNotes Desk$versionString")
@@ -140,9 +141,48 @@ class KeeNotesFXApplication extends Application {
     CSSFX.start()
   }
 
+  def setupPrimaryScene(): Scene = {
+    val layout = new BorderPane()
+    layout.setTop(header())
+    layout.setCenter(notePane())
+    layout.setBottom(footer())
 
-  def setupSceneWith(pane: Parent): Scene = {
-    val scene = new Scene(pane)
+    val stackPane = new StackPane()
+    stackPane.getChildren.add(layout)
+    createSceneWithStyle(stackPane)
+  }
+
+  def setupPreferenceScene(): Scene = {
+    val layout = new VBox(5)
+    layout.setPadding(new Insets(10))
+
+    val doubleClickHandler: EventHandler[MouseEvent] = e => {
+      if (e.getClickCount > 1) {
+        primaryStage.setScene(primaryScene)
+      }
+    }
+
+    val prefPane = settings.preferencesFX.getView
+    prefPane.setOnMouseClicked(doubleClickHandler)
+    layout.getChildren.add(prefPane)
+    VBox.setVgrow(prefPane, Priority.ALWAYS)
+
+    val l = new CenterLabel(texts.getString("label.double.click.go.back"), true)
+    l.setOnMouseClicked(doubleClickHandler)
+    layout.getChildren.add(l)
+    layout.getChildren.add(footer())
+
+    val root = new StackPane(layout)
+    createSceneWithStyle(root)
+  }
+
+  def setupInsightScene(): Scene = {
+    // TODO
+    null
+  }
+
+  def createSceneWithStyle(root: Parent): Scene = {
+    val scene = new Scene(root)
     scene.getStylesheets.add("/css/style.css")
     scene.setFill(Color.web("#464646"))
     scene
@@ -246,7 +286,10 @@ class KeeNotesFXApplication extends Application {
 
     val settingBtn = new JFXButton("", Icons.from("fa-gear:21:aqua"))
     settingBtn.setOnAction(e => {
-      settings.preferencesFX.show(true)
+      //      settings.preferencesFX.show(true)
+
+      primaryStage.setScene(preferenceScene)
+      //      new SlideInRight(settings.preferencesFX.getView).setOnFinished(_=>primaryStage.setScene(new Scene(settings.preferencesFX.getView)))
     })
     HBox.setMargin(settingBtn, new Insets(10, 10, 10, 0))
 
