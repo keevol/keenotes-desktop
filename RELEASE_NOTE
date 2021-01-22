@@ -7,6 +7,6 @@
 - 去除远程模式，只保留单机离线逻辑（Remove Remote Mode）
 - 用户可以选择启动即全屏模式（add setting for full screen on startup）
 - 清理优化代码(clean up code by using more javafx Bindings facility)
-
+- 将偏好设置内聚到主窗口(inline preferences view to primary stage)
 
 
