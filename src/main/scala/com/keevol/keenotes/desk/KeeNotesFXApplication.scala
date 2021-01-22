@@ -1,6 +1,6 @@
 package com.keevol.keenotes.desk
 
-import animatefx.animation.{Bounce, GlowText, SlideInRight}
+import animatefx.animation.FlipInY
 import com.jfoenix.controls.JFXButton
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.javafx.utils.{AnchorPanes, Icons, Images, Stages}
@@ -15,7 +15,6 @@ import com.keevol.keenotes.splash.SplashScreenLoader
 import com.sun.javafx.application.LauncherImpl
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
-import javafx.beans.InvalidationListener
 import javafx.beans.binding.{Bindings, ObjectBinding}
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
@@ -36,7 +35,6 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import java.util.concurrent.atomic.AtomicReference
 import java.util.{Date, Locale, ResourceBundle}
-import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -286,10 +284,8 @@ class KeeNotesFXApplication extends Application {
 
     val settingBtn = new JFXButton("", Icons.from("fa-gear:21:aqua"))
     settingBtn.setOnAction(e => {
-      //      settings.preferencesFX.show(true)
-
+      new FlipInY(preferenceScene.getRoot).play()
       primaryStage.setScene(preferenceScene)
-      //      new SlideInRight(settings.preferencesFX.getView).setOnFinished(_=>primaryStage.setScene(new Scene(settings.preferencesFX.getView)))
     })
     HBox.setMargin(settingBtn, new Insets(10, 10, 10, 0))
 
