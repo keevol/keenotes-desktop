@@ -1,6 +1,7 @@
 package com.keevol.keenotes.desk.settings
 
 import com.dlsc.formsfx.model.structure.Field
+import com.dlsc.formsfx.model.util.ResourceBundleService
 import com.dlsc.preferencesfx.PreferencesFx
 import com.dlsc.preferencesfx.model.{Category, Group, Setting}
 import com.dlsc.preferencesfx.view.PreferencesFxDialog
@@ -11,7 +12,8 @@ import java.util.ResourceBundle
 /**
  * @author fq@keevol.com
  */
-class Settings(texts: ResourceBundle) {
+class Settings(val texts: ResourceBundle) {
+  val rbs = new ResourceBundleService(texts)
 
   val localStoreOnlyProperty = new SimpleBooleanProperty(true)
   val sqliteFileProperty = new SimpleStringProperty(s"${System.getProperty("user.home")}/keenotes.sqlite3")
@@ -22,53 +24,27 @@ class Settings(texts: ResourceBundle) {
   val readTimeoutProperty = new SimpleIntegerProperty(30000)
   val syncCommandProperty = new SimpleStringProperty("")
 
+  val fullScreenOnStartProperty = new SimpleBooleanProperty(false)
   val noteDisplayLimitProperty = new SimpleIntegerProperty()
   val fontProperty = new SimpleStringProperty("Serif, 14.0, Regular")
 
-
-  val basicGroup: Group = Group.of(texts.getString("label.local.config"),
-    Setting.of(texts.getString("label.local.mode"), localStoreOnlyProperty),
-    Setting.of(texts.getString("label.sqlite.location"), sqliteFileProperty),
+  val basicGroup: Group = Group.of("label.local.config",
+    Setting.of("label.sqlite.location", sqliteFileProperty),
   )
 
-  val basicGroupLocal: Group = Group.of("KeeNotes Local Configuration",
-    Setting.of("Local Store Only", localStoreOnlyProperty),
-    Setting.of("KeeNotes Sqlite", sqliteFileProperty),
+  val uiGroup: Group = Group.of("label.ui.section.title",
+    Setting.of("label.ui.fullscreen.onstart", fullScreenOnStartProperty),
+    Setting.of("label.ui.note.display.num", noteDisplayLimitProperty),
+    Setting.of("label.ui.note.font", Field.ofStringType(fontProperty).render(new SimpleFontControl()), fontProperty)
   )
 
-  val remoteGroup: Group = Group.of("Remote Relay Server Configuration",
-    Setting.of("Note Server", noteRelayServerProperty),
-    Setting.of("Token", tokenProperty),
-    Setting.of("Connect Timeout", connectTimeoutProperty),
-    Setting.of("Read Timeout", readTimeoutProperty),
-    Setting.of("rsync note command", syncCommandProperty))
-
-  val uiGroup: Group = Group.of("GUI Settings",
-    Setting.of("Note Display Num.", noteDisplayLimitProperty),
-    Setting.of("Font", Field.ofStringType(fontProperty).render(new SimpleFontControl()), fontProperty)
-  )
-  val uiGroupLocal: Group = Group.of("GUI Settings",
-    Setting.of("Note Display Num.", noteDisplayLimitProperty),
-    Setting.of("Font", Field.ofStringType(fontProperty).render(new SimpleFontControl()), fontProperty)
-  )
-
-  val category: Category = Category.of("KeeNotes Preferences", basicGroup, uiGroup, remoteGroup)
-  val categoryLocal: Category = Category.of("KeeNotes Preferences", basicGroupLocal, uiGroupLocal)
-
-  val preferencesFX: PreferencesFx = PreferencesFx.of(getClass, category)
+  val preferencesFX: PreferencesFx = PreferencesFx.of(getClass, Category.of("label.preference.title", basicGroup, uiGroup))
     .buttonsVisibility(true)
     .debugHistoryMode(true)
-    .instantPersistent(true)
-    .saveSettings(true)
-
-  val preferencesFXLocal: PreferencesFx = PreferencesFx.of(getClass, categoryLocal)
-    .buttonsVisibility(true)
-    .debugHistoryMode(true)
-    .instantPersistent(true)
+    .instantPersistent(true).i18n(rbs)
     .saveSettings(true)
 
   attachCss(preferencesFX)
-  attachCss(preferencesFXLocal)
 
   def attachCss(pref: PreferencesFx): Unit = {
     val f = pref.getClass.getDeclaredField("preferencesFxDialog")

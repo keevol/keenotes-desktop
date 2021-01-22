@@ -8,12 +8,13 @@ import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, version}
 import com.keevol.keenotes.desk.controls.InProgressMask
 import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.repository.NoteRepository
-import com.keevol.keenotes.desk.settings.{Settings, SettingsDialog}
-import com.keevol.keenotes.desk.utils.{FontStringConverter, SimpleProcessLoggerFactory}
+import com.keevol.keenotes.desk.settings.Settings
+import com.keevol.keenotes.desk.utils.FontStringConverter
 import com.keevol.keenotes.splash.SplashScreenLoader
 import com.sun.javafx.application.LauncherImpl
 import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
+import javafx.beans.InvalidationListener
 import javafx.beans.binding.{Bindings, ObjectBinding}
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
@@ -36,7 +37,6 @@ import java.util.{Date, Locale, ResourceBundle}
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.sys.process.Process
 
 /**
  * @author fq@keevol.com
@@ -44,12 +44,15 @@ import scala.sys.process.Process
 class KeeNotesFXApplication extends Application {
 
   val logger: Logger = LoggerFactory.getLogger(classOf[KeeNotesFXApplication])
-  val defaultFont: Font = Font.font("Trebuchet MS")
-  val texts:ResourceBundle = ResourceBundle.getBundle("bundles/gui", Locale.getDefault)
+  val defaultFont: Font = Font.font("Aria")
+  val texts: ResourceBundle = ResourceBundle.getBundle("bundles/gui", Locale.getDefault)
 
   val settings = new Settings(texts)
   val fontStringConverter = new FontStringConverter()
-  val noteFontProperty: ObjectBinding[Font] = Bindings.createObjectBinding(() => fontStringConverter.fromString(settings.fontProperty.get()), settings.fontProperty)
+  val noteFontProperty: ObjectBinding[Font] = Bindings.createObjectBinding(() => {
+    logger.info(s"create font from string: ${settings.fontProperty.get()}")
+    fontStringConverter.fromString(settings.fontProperty.get())
+  }, settings.fontProperty)
 
   val repository = new NoteRepository(settings)
 
@@ -74,8 +77,6 @@ class KeeNotesFXApplication extends Application {
   val so = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
   so.setPrefWidth(300)
   so.setLeft(Icons.SEARCH)
-  //  logger.info(s"sync font of search field to ${settings.fontProperty.get()}")
-  //  so.fontProperty().bind(noteFontProperty)
 
   val action: () => Unit = () => {
     val keyword = StringUtils.trimToEmpty(so.getText)
@@ -109,14 +110,16 @@ class KeeNotesFXApplication extends Application {
     val versionString = if (StringUtils.isEmpty(StringUtils.trimToEmpty(version.get()))) "" else s"(${version.get()})"
     primaryStage.setTitle(s"KeeNotes Desk$versionString")
     primaryStage.getIcons.add(Images.from("/images/logo.png"))
-    val WIDTH = 400
-    val HEIGHT = 600
+    val WIDTH = 520
+    val HEIGHT = 700
     primaryStage.setWidth(WIDTH)
     primaryStage.setMinWidth(WIDTH)
     primaryStage.setMaxWidth(WIDTH)
     primaryStage.setHeight(HEIGHT)
     primaryStage.setMinHeight(HEIGHT)
-    //    stage.initStyle(StageStyle.UTILITY)
+    if (settings.fullScreenOnStartProperty.get()) {
+      primaryStage.setFullScreen(true)
+    }
 
     val closeHandler: EventHandler[WindowEvent] = e => {
       logger.info("Close Request Received, start closing the application...")
@@ -171,17 +174,6 @@ class KeeNotesFXApplication extends Application {
         Future {
           try {
             repository.insert(new Note(content = content, channel = ch, dt = new Date()))
-
-            if (!settings.localStoreOnlyProperty.get()) {
-              val r = requests.post(settings.noteRelayServerProperty.getValue,
-                headers = Map("Content-Type" -> "application/x-www-form-urlencoded"),
-                params = Map("token" -> settings.tokenProperty.getValue, "channel" -> ch, "text" -> content),
-                connectTimeout = settings.connectTimeoutProperty.getValue,
-                readTimeout = settings.readTimeoutProperty.getValue)
-              if (r.statusCode != 200) {
-                throw new Exception(s"remote note relay error: ${r.statusCode} - ${r.statusMessage}")
-              }
-            }
 
             ui {
               textArea.clear()
@@ -247,45 +239,6 @@ class KeeNotesFXApplication extends Application {
 
     HBox.setMargin(so, new Insets(10, 0, 10, 10))
 
-    val sync = new JFXButton("", Icons.from("fa-refresh:21:aqua"))
-    sync.disableProperty().bind(settings.localStoreOnlyProperty.or(inProgressProperty))
-    sync.setOnMouseClicked(e => {
-
-      val processLogger = new SimpleProcessLoggerFactory
-
-      mask.setWidth(400)
-      mask.show()
-      Stages.center(mask, primaryStage)
-
-      inProgressProperty.set(true)
-      sync.getScene.setCursor(Cursor.WAIT)
-      Future {
-
-        try {
-          if (StringUtils.isEmpty(StringUtils.trimToEmpty(settings.syncCommandProperty.get()))) throw new IllegalArgumentException(s"bad sync command: ${settings.syncCommandProperty}")
-          val exitCode = Process(Seq("bash", "-c", settings.syncCommandProperty.get()), None, System.getenv().asScala.toSeq: _*) ! processLogger.logger
-          exitCode match {
-            case 0 => Platform.runLater(() => info("Note Synced Successfully."))
-            case _ => {
-              Platform.runLater(() => error(s"something goes wrong with exit code=$exitCode, check log for more information."))
-              logger.error(processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
-            }
-          }
-        } catch {
-          case t: Throwable => {
-            Platform.runLater(() => error(s"something goes wrong with exception thrown, check log for more information."))
-            logger.error(ExceptionUtils.getStackTrace(t) + "\n" + processLogger.getConsoleOutput()._1 + "\n" + processLogger.getConsoleOutput()._2)
-          }
-        } finally {
-          Platform.runLater(() => {
-            inProgressProperty.set(false)
-            sync.getScene.setCursor(Cursor.DEFAULT)
-            mask.close()
-          })
-        }
-      }
-    })
-
     val stats = new JFXButton("", Icons.from("fa-bar-chart:21:aqua"))
     stats.setOnAction(e => {
       // TODO add analysis to notes
@@ -293,12 +246,11 @@ class KeeNotesFXApplication extends Application {
 
     val settingBtn = new JFXButton("", Icons.from("fa-gear:21:aqua"))
     settingBtn.setOnAction(e => {
-      val dialog = new SettingsDialog(settings)
-      dialog.show()
+      settings.preferencesFX.show(true)
     })
     HBox.setMargin(settingBtn, new Insets(10, 10, 10, 0))
 
-    hbox.getChildren.addAll(so, placeholder(), sync, stats, settingBtn)
+    hbox.getChildren.addAll(so, placeholder(), stats, settingBtn)
 
     hbox
   }
