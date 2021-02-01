@@ -1,7 +1,8 @@
 package com.keevol.keenotes.desk
 
 import animatefx.animation.{FadeInUp, FlipInY, LightSpeedIn}
-import com.jfoenix.controls.JFXButton
+import com.jfoenix.controls.JFXSnackbar.SnackbarEvent
+import com.jfoenix.controls.{JFXButton, JFXSnackbar, JFXSnackbarLayout}
 import com.keevol.javafx.utils.Platforms._
 import com.keevol.javafx.utils.{AnchorPanes, Icons, Images, Stages}
 import com.keevol.keenotes.KeeNoteCard
@@ -17,7 +18,8 @@ import fr.brouillard.oss.cssfx.CSSFX
 import javafx.application.{Application, Platform}
 import javafx.beans.binding.{Bindings, ObjectBinding}
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.event.EventHandler
+import javafx.css.PseudoClass
+import javafx.event.{ActionEvent, EventHandler}
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
 import javafx.scene.input.MouseEvent
@@ -98,6 +100,9 @@ class KeeNotesFXApplication extends Application {
     }
   })
 
+  val snackBar = new JFXSnackbar()
+  snackBar.setPrefWidth(400)
+
   override def start(stage: Stage): Unit = {
     primaryStage = stage
 
@@ -148,6 +153,7 @@ class KeeNotesFXApplication extends Application {
 
     val stackPane = new StackPane()
     stackPane.getChildren.add(layout)
+
     createSceneWithStyle(stackPane)
   }
 
@@ -191,8 +197,10 @@ class KeeNotesFXApplication extends Application {
   def notePane() = {
     val vbox = new VBox()
 
-    VBox.setMargin(textArea, new Insets(0, 10, 10, 10))
-    vbox.getChildren.add(textArea)
+    val textPane = new StackPane(textArea)
+    snackBar.registerSnackbarContainer(textPane)
+    VBox.setMargin(textPane, new Insets(0, 10, 10, 10))
+    vbox.getChildren.add(textPane)
 
     val submit = new Button(texts.getString("button.submit"))
     makeClickable(submit)
@@ -348,7 +356,7 @@ class KeeNotesFXApplication extends Application {
   }
 
   def info(message: String) = {
-    Notifications.create().darkStyle().title("Success").text(message).owner(primaryStage).showInformation()
+    snackBar.enqueue(new SnackbarEvent(new JFXSnackbarLayout(message), PseudoClass.getPseudoClass("info-toast")))
   }
 
   def error(message: String) = {

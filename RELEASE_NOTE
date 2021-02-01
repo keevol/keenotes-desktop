@@ -1,12 +1,7 @@
 # Release Note
 
-- 添加程序图标(add logo to window)
-- 添加多语言资源包(add resource bundles for different locale users)
-- 增加分析大盘UI入口（功能有待实现）(add stats entry on UI)
-- 优化字体资源的使用(optimize Font instance on cards)
-- 去除远程模式，只保留单机离线逻辑（Remove Remote Mode）
-- 用户可以选择启动即全屏模式（add setting for full screen on startup）
-- 清理优化代码(clean up code by using more javafx Bindings facility)
-- 将偏好设置内聚到主窗口(inline preferences view to primary stage)
+- 改进消息通知形式(Use JFXSnackbar for message notification instead of NotificationPane)
+
+
 
 

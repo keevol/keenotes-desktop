@@ -105,3 +105,7 @@
     -fx-border-width: 0 0 1 0; /* its make really one-pixel-border */
     -fx-border-color: white;
 }
+
+.jfx-snackbar-content:info-toast{
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+}
