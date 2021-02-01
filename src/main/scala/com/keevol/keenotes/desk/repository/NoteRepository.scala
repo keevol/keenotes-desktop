@@ -12,6 +12,7 @@ import java.sql.{PreparedStatement, ResultSet}
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.mutable.ListBuffer
+
 /**
  * @author fq@keevol.com
  */
@@ -47,7 +48,7 @@ class NoteRepository(settings: Settings) {
       |                	tags text NOT NULL,
       |                	updated TEXT DEFAULT (datetime('now','localtime')) -- datetime in ISO8601 format
       |                );""".stripMargin)
-
+  executor.get().execute("CREATE INDEX IF NOT EXISTS notes_updated_idx ON notes(updated);")
 
   def load(limitCount: Int = 11): List[Note] = {
     val q = s"""select * from notes order by datetime(updated) desc limit $limitCount"""

@@ -1,6 +1,6 @@
 package com.keevol.keenotes.desk
 
-import animatefx.animation.{FadeInUp, FlipInY, LightSpeedIn}
+import animatefx.animation.{FadeInUp, FlipInY}
 import com.jfoenix.controls.JFXSnackbar.SnackbarEvent
 import com.jfoenix.controls.{JFXButton, JFXSnackbar, JFXSnackbarLayout}
 import com.keevol.javafx.utils.Platforms._
@@ -19,7 +19,7 @@ import javafx.application.{Application, Platform}
 import javafx.beans.binding.{Bindings, ObjectBinding}
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.css.PseudoClass
-import javafx.event.{ActionEvent, EventHandler}
+import javafx.event.EventHandler
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.control._
 import javafx.scene.input.MouseEvent
@@ -28,7 +28,6 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.{Cursor, Node, Parent, Scene}
 import javafx.stage.{Stage, WindowEvent}
-import javafx.util.Duration
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.commons.lang3.time.DateFormatUtils
