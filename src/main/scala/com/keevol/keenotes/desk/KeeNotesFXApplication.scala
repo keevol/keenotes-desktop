@@ -167,7 +167,10 @@ class KeeNotesFXApplication extends Application {
 
     val doubleClickHandler: EventHandler[MouseEvent] = e => {
       if (e.getClickCount > 1) {
+        settings.preferencesFX.saveSettings()
+        repository.refreshSqliteDBIfNecessary()
         primaryStage.setScene(primaryScene)
+        action() // refresh primary scene if db changed.
       }
     }
 

@@ -5,15 +5,13 @@ import com.keevol.keenotes.desk.settings.Settings
 import com.keevol.utils.{DateFormalizer, Sqlite3}
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import org.apache.commons.io.FileUtils
+import org.apache.commons.lang3.StringUtils
 import org.slf4j.{Logger, LoggerFactory}
-import org.springframework.jdbc.core.RowMapper
 import org.sqlite.SQLiteConfig
 
 import java.io.File
 import java.sql.{PreparedStatement, ResultSet}
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.JavaConverters.asScalaBufferConverter
-import scala.collection.mutable.ListBuffer
 
 /**
  * @author fq@keevol.com
@@ -29,30 +27,27 @@ class NoteRepository(settings: Settings) {
     note
   }
 
+  val sqliteLocation = new AtomicReference[String]()
+
   val executor: AtomicReference[Sqlite3] = new AtomicReference[Sqlite3]()
   setupSqliteExecutor()
 
-  settings.sqliteFileProperty.addListener(new ChangeListener[String] {
-    override def changed(observable: ObservableValue[_ <: String], oldValue: String, newValue: String): Unit = {
+//  settings.sqliteFileProperty.addListener({ _=>
+//    refreshSqliteDB()
+//  })
+
+  def refreshSqliteDBIfNecessary() = {
+    if(!StringUtils.equalsAnyIgnoreCase(settings.sqliteFileProperty.get(), sqliteLocation.get())) {
       val oldDB = executor.get()
       if (oldDB != null) oldDB.dispose()
       setupSqliteExecutor()
     }
-  })
-
-  executor.get().execute(
-    """CREATE TABLE IF NOT EXISTS notes (
-      |                	content text NOT NULL,
-      |                	tags text NOT NULL,
-      |                	updated TEXT DEFAULT (datetime('now','localtime')) -- datetime in ISO8601 format
-      |                );""".stripMargin)
-  executor.get().execute("CREATE INDEX IF NOT EXISTS notes_updated_idx ON notes(updated);")
-  executor.get().execute("CREATE VIRTUAL TABLE IF NOT EXISTS NoteSearch USING fts5(content, tags, updated, tokenize='simple');")
-  executor.get().execute("CREATE TABLE IF NOT EXISTS migration_mark(mark text, updated TEXT DEFAULT (datetime('now','localtime')))")
-  migrateDataIfNecessary()
+  }
 
 
   def setupSqliteExecutor(): Unit = {
+    sqliteLocation.set(settings.sqliteFileProperty.get())
+
     val cfg = new SQLiteConfig()
     cfg.enableLoadExtension(true)
 
@@ -64,6 +59,21 @@ class NoteRepository(settings: Settings) {
     sqlite3.execute(s"""SELECT load_extension('${System.getProperty("java.io.tmpdir")}libsimple')""")
 
     executor.set(sqlite3)
+
+    setupTables()
+    migrateDataIfNecessary()
+  }
+
+  def setupTables() = {
+    executor.get().execute(
+      """CREATE TABLE IF NOT EXISTS notes (
+        |                	content text NOT NULL,
+        |                	tags text NOT NULL,
+        |                	updated TEXT DEFAULT (datetime('now','localtime')) -- datetime in ISO8601 format
+        |                );""".stripMargin)
+    executor.get().execute("CREATE INDEX IF NOT EXISTS notes_updated_idx ON notes(updated);")
+    executor.get().execute("CREATE VIRTUAL TABLE IF NOT EXISTS NoteSearch USING fts5(content, tags, updated, tokenize='simple');")
+    executor.get().execute("CREATE TABLE IF NOT EXISTS migration_mark(mark text, updated TEXT DEFAULT (datetime('now','localtime')))")
   }
 
   def migrateDataIfNecessary() = {

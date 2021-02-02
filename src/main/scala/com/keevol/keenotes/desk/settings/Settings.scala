@@ -41,7 +41,8 @@ class Settings(val texts: ResourceBundle) {
   val preferencesFX: PreferencesFx = PreferencesFx.of(getClass, Category.of("label.preference.title", basicGroup, uiGroup))
     .buttonsVisibility(true)
     .debugHistoryMode(true)
-    .instantPersistent(true).i18n(rbs)
+    .instantPersistent(true)
+    .i18n(rbs)
     .saveSettings(true)
 
   attachCss(preferencesFX)
