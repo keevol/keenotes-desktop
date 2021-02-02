@@ -2,6 +2,7 @@
 
 - 改进消息通知形式(Use JFXSnackbar for message notification instead of NotificationPane)
 - 改进搜索机制(use FTS5 to do search)
+- 变更存储逻辑(use FTS5 virtual table as store and search backend)
 - 重构Sqlite数据访问逻辑(refactoring on Sqlite Data Access, that's, raw Jdbc instead of Spring Jdbc)
 - 修正数据库变更时状态不一致问题(Fix issue on Sqlite db file swap)
 

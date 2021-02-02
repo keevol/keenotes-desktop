@@ -65,13 +65,9 @@ class NoteRepository(settings: Settings) {
   }
 
   def setupTables() = {
-    executor.get().execute(
-      """CREATE TABLE IF NOT EXISTS notes (
-        |                	content text NOT NULL,
-        |                	tags text NOT NULL,
-        |                	updated TEXT DEFAULT (datetime('now','localtime')) -- datetime in ISO8601 format
-        |                );""".stripMargin)
-    executor.get().execute("CREATE INDEX IF NOT EXISTS notes_updated_idx ON notes(updated);")
+    executor.get().execute("""DROP TABLE IF EXISTS notes""")
+    executor.get().execute("""DROP INDEX IF EXISTS notes_updated_idx""")
+
     executor.get().execute("CREATE VIRTUAL TABLE IF NOT EXISTS NoteSearch USING fts5(content, tags, updated, tokenize='simple');")
     executor.get().execute("CREATE TABLE IF NOT EXISTS migration_mark(mark text, updated TEXT DEFAULT (datetime('now','localtime')))")
   }
