@@ -127,8 +127,13 @@ class KeeNotesFXApplication extends Application {
 
     val closeHandler: EventHandler[WindowEvent] = e => {
       logger.info("Close Request Received, start closing the application...")
+
+      logger.info("dispose Note Repository...")
+      repository.dispose()
+
       logger.info("Platform.exit()...")
       Platform.exit()
+
       logger.info("System.exit(0)...")
       System.exit(0)
     }

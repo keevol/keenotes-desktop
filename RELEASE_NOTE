@@ -1,7 +1,8 @@
 # Release Note
 
 - 改进消息通知形式(Use JFXSnackbar for message notification instead of NotificationPane)
-
+- 改进搜索机制(use FTS5 to do search)
+- 重构Sqlite数据访问逻辑(refactoring on Sqlite Data Access, that's, raw Jdbc instead of Spring Jdbc)
 
 
 
