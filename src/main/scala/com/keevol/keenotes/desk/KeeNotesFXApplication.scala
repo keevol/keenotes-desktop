@@ -169,6 +169,8 @@ class KeeNotesFXApplication extends Application {
       if (e.getClickCount > 1) {
         settings.preferencesFX.saveSettings()
         repository.refreshSqliteDBIfNecessary()
+
+        new FlipInY(primaryScene.getRoot).play()
         primaryStage.setScene(primaryScene)
         action() // refresh primary scene if db changed.
       }
