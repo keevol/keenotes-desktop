@@ -2,6 +2,14 @@
 
 keenotes的桌面客户端，一个个人的闪念知识库。
 
+KeeNotes is a Privacy-Preferred Personal Knowledgebase Management Tool.
+
+It's light, it's small and it's confined for you only.
+
+Since I have continuously polish this tool, I would like to share it with you.
+
+I hope you can give it a try and [any feedback](https://github.com/keevol/keenotes-desktop/issues) is preferred.
+
 ![](images/10631610357372_.pic_hd.jpg)
 
 可以直接[下载MacOS版](https://github.com/keevol/keenotes-desktop/releases)使用。
