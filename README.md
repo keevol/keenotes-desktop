@@ -10,7 +10,7 @@ Since I have continuously polish this tool, I would like to share it with you.
 
 I hope you can give it a try and [any feedback](https://github.com/keevol/keenotes-desktop/issues) is preferred.
 
-![](images/10631610357372_.pic_hd.jpg)
+![](images/Screen Shot 2021-02-03 at 21.36.40.png)
 
 可以直接[下载MacOS版](https://github.com/keevol/keenotes-desktop/releases)使用。
 

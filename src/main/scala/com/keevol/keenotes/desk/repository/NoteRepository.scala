@@ -32,7 +32,7 @@ class NoteRepository(settings: Settings) {
   setupSqliteExecutor()
 
   def refreshSqliteDBIfNecessary() = {
-    if(!StringUtils.equalsAnyIgnoreCase(settings.sqliteFileProperty.get(), sqliteLocation.get())) {
+    if (!StringUtils.equalsAnyIgnoreCase(settings.sqliteFileProperty.get(), sqliteLocation.get())) {
       val oldDB = executor.get()
       if (oldDB != null) oldDB.dispose()
       setupSqliteExecutor()
@@ -50,8 +50,12 @@ class NoteRepository(settings: Settings) {
     sqlite3.connect()
 
     val extractedSoFile = new File(System.getProperty("java.io.tmpdir"), "libsimple.dylib")
+    logger.info(s"extract libsimple.dylib in classpath to ${extractedSoFile.getAbsolutePath}")
     FileUtils.copyURLToFile(getClass.getResource("/so/libsimple.dylib"), extractedSoFile)
-    sqlite3.execute(s"""SELECT load_extension('${System.getProperty("java.io.tmpdir")}libsimple')""")
+
+    val loadCmd = s"""SELECT load_extension('${System.getProperty("java.io.tmpdir")}libsimple')"""
+    logger.info(s"load simple extension with command: $loadCmd")
+    sqlite3.execute(loadCmd)
 
     executor.set(sqlite3)
 
@@ -88,9 +92,9 @@ class NoteRepository(settings: Settings) {
   }
 
   def search(keyword: String): List[Note] = {
-    logger.info(s"search with keyword=`$keyword`")
-
-    executor.get().query(s"""SELECT * FROM NoteSearch WHERE NoteSearch MATCH '${keyword}*' order by datetime(updated) desc;""")(noteRowMapper)
+    val so = s"""SELECT * FROM NoteSearch WHERE NoteSearch MATCH 'content:${keyword}*' order by datetime(updated) desc;"""
+    logger.info(s"""search with keyword=`$keyword` and search phrase=`$so` """)
+    executor.get().query(so)(noteRowMapper)
   }
 
   def insert(note: Note) = {

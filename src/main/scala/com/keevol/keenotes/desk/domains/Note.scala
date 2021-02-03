@@ -4,6 +4,6 @@ import java.util.Date
 /**
  * @author fq@keevol.com
  */
-class Note(var content: String, var channel: String, var dt: Date) {
+case class Note(var content: String, var channel: String, var dt: Date) {
   def this() = this("", "", new Date())
 }
