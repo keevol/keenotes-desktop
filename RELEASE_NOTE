@@ -5,5 +5,8 @@
 - 变更存储逻辑(use FTS5 virtual table as store and search backend)
 - 重构Sqlite数据访问逻辑(refactoring on Sqlite Data Access, that's, raw Jdbc instead of Spring Jdbc)
 - 修正数据库变更时状态不一致问题(Fix issue on Sqlite db file swap)
-
+- 删除不必要的界面元素(remove unnecessary UI elements)
+    - 删除数据分析入口(remove analysis entry since it's not important for the time being)
+    - 删除返回主界面提醒(remove Label with animation which gives a hint to go back to primary scene)
+- 清除非必要代码(clean up code)
 

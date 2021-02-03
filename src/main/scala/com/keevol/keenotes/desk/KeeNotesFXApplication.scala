@@ -1,6 +1,7 @@
 package com.keevol.keenotes.desk
 
 import animatefx.animation.{FadeInUp, FlipInY}
+import com.dlsc.preferencesfx.view.UndoRedoBox
 import com.jfoenix.controls.JFXSnackbar.SnackbarEvent
 import com.jfoenix.controls.{JFXButton, JFXSnackbar, JFXSnackbarLayout}
 import com.keevol.javafx.utils.Platforms._
@@ -165,25 +166,38 @@ class KeeNotesFXApplication extends Application {
     val layout = new VBox(5)
     layout.setPadding(new Insets(10))
 
+    val actionHandler: () => Unit = { () =>
+      settings.preferencesFX.saveSettings()
+      repository.refreshSqliteDBIfNecessary()
+
+      new FlipInY(primaryScene.getRoot).play()
+      primaryStage.setScene(primaryScene)
+      action() // refresh primary scene if db changed.
+    }
+
     val doubleClickHandler: EventHandler[MouseEvent] = e => {
       if (e.getClickCount > 1) {
-        settings.preferencesFX.saveSettings()
-        repository.refreshSqliteDBIfNecessary()
-
-        new FlipInY(primaryScene.getRoot).play()
-        primaryStage.setScene(primaryScene)
-        action() // refresh primary scene if db changed.
+        actionHandler()
       }
     }
 
+
     val prefPane = settings.preferencesFX.getView
     prefPane.setOnMouseClicked(doubleClickHandler)
-    layout.getChildren.add(prefPane)
-    VBox.setVgrow(prefPane, Priority.ALWAYS)
 
-    val l = new CenterLabel(texts.getString("label.double.click.go.back"), true)
-    l.setOnMouseClicked(doubleClickHandler)
-    layout.getChildren.add(l)
+    val backBtn = new Button("", Icons.from("fa-arrow-left:14:black"))
+    backBtn.setTooltip(new Tooltip(texts.getString("button.back.to.main")))
+    backBtn.setId("back-to-primary")
+    backBtn.setOnAction(_ => actionHandler())
+
+    val prefPaneCombo = new AnchorPane()
+    prefPaneCombo.getChildren.addAll(prefPane, backBtn)
+    AnchorPanes.stickAllEdges(prefPane)
+    AnchorPane.setTopAnchor(backBtn, 0)
+    AnchorPane.setLeftAnchor(backBtn, 10)
+    layout.getChildren.add(prefPaneCombo)
+    VBox.setVgrow(prefPaneCombo, Priority.ALWAYS)
+
     layout.getChildren.add(footer())
 
     val root = new StackPane(layout)
@@ -302,10 +316,10 @@ class KeeNotesFXApplication extends Application {
 
     HBox.setMargin(so, new Insets(10, 0, 10, 10))
 
-    val stats = new JFXButton("", Icons.from("fa-bar-chart:21:aqua"))
-    stats.setOnAction(e => {
-      // TODO add analysis to notes
-    })
+    //    val stats = new JFXButton("", Icons.from("fa-bar-chart:21:aqua"))
+    //    stats.setOnAction(e => {
+    //      // TODO add analysis to notes
+    //    })
 
     val settingBtn = new JFXButton("", Icons.from("fa-gear:21:aqua"))
     settingBtn.setOnAction(e => {
@@ -314,7 +328,7 @@ class KeeNotesFXApplication extends Application {
     })
     HBox.setMargin(settingBtn, new Insets(10, 10, 10, 0))
 
-    hbox.getChildren.addAll(so, placeholder(), stats, settingBtn)
+    hbox.getChildren.addAll(so, placeholder(), settingBtn)
 
     hbox
   }
