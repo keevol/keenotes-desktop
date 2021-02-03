@@ -10,10 +10,11 @@ Since I have continuously polish this tool, I would like to share it with you.
 
 I hope you can give it a try and [any feedback](https://github.com/keevol/keenotes-desktop/issues) is preferred.
 
-![](images/Screen Shot 2021-02-03 at 21.36.40.png)
+![](images/how_it_look.png)
 
 可以直接[下载MacOS版](https://github.com/keevol/keenotes-desktop/releases)使用。
 
+[演示动画可以参看这里](https://github.com/keevol/keenotes-desktop/releases/download/v1.2.1/Screen-Recording-2021-02-03-at-21.44.34.gif)， 因为比较占屏幕空间，就不inline到README啦~
 
 # 常见问题（You Might Want to know)
 
