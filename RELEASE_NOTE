@@ -2,5 +2,6 @@
 
 - 更新README，增加更多产品说明信息(Update README to enrich more product information).
 - 缩小搜索关键字的查找范围，防止搜索泛化(narrow search scope to note content only for more specific results).
+- bugfix: 直接使用1.2.1版本的新用户会因为之前版本的表不存在而导致异常退出(fix table non-exist bug for new users since 1.2.1)
 
 

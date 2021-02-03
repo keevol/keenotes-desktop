@@ -75,12 +75,14 @@ class NoteRepository(settings: Settings) {
 
     if (markList.isEmpty) {
       logger.info("migrate notes from `notes` table to NoteSearch...")
-      executor.get().execute("INSERT INTO NoteSearch SELECT content, tags, updated FROM notes;")
+      if (executor.get().connection.getMetaData.getTables(null, null, "notes", null).next()) {
+        executor.get().execute("INSERT INTO NoteSearch SELECT content, tags, updated FROM notes;")
+        executor.get().execute("""DROP TABLE IF EXISTS notes""")
+        executor.get().execute("""DROP INDEX IF EXISTS notes_updated_idx""")
+      }
+
       logger.info("mark migration done!")
       executor.get().execute(s"INSERT INTO migration_mark(mark) values('1')")
-
-      executor.get().execute("""DROP TABLE IF EXISTS notes""")
-      executor.get().execute("""DROP INDEX IF EXISTS notes_updated_idx""")
     }
   }
 
