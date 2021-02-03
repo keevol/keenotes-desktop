@@ -3,7 +3,6 @@ package com.keevol.keenotes.desk.repository
 import com.keevol.keenotes.desk.domains.Note
 import com.keevol.keenotes.desk.settings.Settings
 import com.keevol.utils.{DateFormalizer, Sqlite3}
-import javafx.beans.value.{ChangeListener, ObservableValue}
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.{Logger, LoggerFactory}
@@ -31,10 +30,6 @@ class NoteRepository(settings: Settings) {
 
   val executor: AtomicReference[Sqlite3] = new AtomicReference[Sqlite3]()
   setupSqliteExecutor()
-
-//  settings.sqliteFileProperty.addListener({ _=>
-//    refreshSqliteDB()
-//  })
 
   def refreshSqliteDBIfNecessary() = {
     if(!StringUtils.equalsAnyIgnoreCase(settings.sqliteFileProperty.get(), sqliteLocation.get())) {
@@ -65,9 +60,6 @@ class NoteRepository(settings: Settings) {
   }
 
   def setupTables() = {
-    executor.get().execute("""DROP TABLE IF EXISTS notes""")
-    executor.get().execute("""DROP INDEX IF EXISTS notes_updated_idx""")
-
     executor.get().execute("CREATE VIRTUAL TABLE IF NOT EXISTS NoteSearch USING fts5(content, tags, updated, tokenize='simple');")
     executor.get().execute("CREATE TABLE IF NOT EXISTS migration_mark(mark text, updated TEXT DEFAULT (datetime('now','localtime')))")
   }
@@ -82,6 +74,9 @@ class NoteRepository(settings: Settings) {
       executor.get().execute("INSERT INTO NoteSearch SELECT content, tags, updated FROM notes;")
       logger.info("mark migration done!")
       executor.get().execute(s"INSERT INTO migration_mark(mark) values('1')")
+
+      executor.get().execute("""DROP TABLE IF EXISTS notes""")
+      executor.get().execute("""DROP INDEX IF EXISTS notes_updated_idx""")
     }
   }
 

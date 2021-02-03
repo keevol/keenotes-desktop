@@ -222,7 +222,6 @@ class KeeNotesFXApplication extends Application {
         Stages.center(mask, primaryStage)
 
         textArea.setEditable(false)
-        //        submit.setDisable(true)
         inProgressProperty.set(true)
         submit.getScene.setCursor(Cursor.WAIT)
         Future {
