@@ -38,6 +38,7 @@
     {"pattern":"\\Qlogo.png\\E"}, 
     {"pattern":"\\Qorg/controlsfx/control/textfield/customtextfield.css\\E"}, 
     {"pattern":"\\Qorg/controlsfx/control/toggleswitch.css\\E"}, 
+    {"pattern":"\\Qorg/controlsfx/dialog/dialogs.css\\E"}, 
     {"pattern":"\\Qorg/controlsfx/glyphfont/fontawesome-webfont.ttf\\E"}, 
     {"pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"}, 
     {"pattern":"\\Qorg/sqlite/native/Mac/x86_64/libsqlitejdbc.jnilib\\E"}, 
@@ -46,6 +47,7 @@
   "bundles":[
     {"name":"bundles/gui"}, 
     {"name":"com.sun.javafx.tk.quantum.QuantumMessagesBundle"}, 
-    {"name":"com/sun/javafx/scene/control/skin/resources/controls"}
+    {"name":"com/sun/javafx/scene/control/skin/resources/controls"}, 
+    {"name":"controlsfx"}
   ]
 }

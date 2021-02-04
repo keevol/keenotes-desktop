@@ -101,9 +101,6 @@
   "name":"com.sun.glass.ui.mac.MacApplication"
 },
 {
-  "name":"com.sun.glass.ui.mac.MacGestureSupport"
-},
-{
   "name":"com.sun.glass.ui.mac.MacMenuBarDelegate"
 },
 {
@@ -116,6 +113,14 @@
 {
   "name":"com.sun.javafx.font.coretext.CTFactory",
   "methods":[{"name":"getFactory","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.javafx.logging.PrintLogger",
+  "methods":[{"name":"createInstance","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.javafx.logging.jfr.JFRPulseLogger",
+  "methods":[{"name":"createInstance","parameterTypes":[] }]
 },
 {
   "name":"com.sun.javafx.reflect.Trampoline",
@@ -374,9 +379,6 @@
 },
 {
   "name":"javafx.scene.image.ImageView"
-},
-{
-  "name":"javafx.scene.input.Clipboard"
 },
 {
   "name":"javafx.scene.layout.AnchorPane",

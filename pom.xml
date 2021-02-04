@@ -15,8 +15,8 @@
         <java.version>11</java.version>
         <scala.version>2.12.12</scala.version>
         <scala.plugin.version>4.4.0</scala.plugin.version>
-        <javafx.version>11.0.2</javafx.version>
-        <!--        <javafx.version>15</javafx.version>-->
+<!--        <javafx.version>11.0.2</javafx.version>-->
+                <javafx.version>15</javafx.version>
         <!--        <javafx.version>16-ea+6</javafx.version>-->
     </properties>
 

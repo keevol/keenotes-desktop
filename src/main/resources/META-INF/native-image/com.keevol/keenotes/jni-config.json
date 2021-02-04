@@ -8,11 +8,9 @@
     {"name":"leaveNestedEventLoop","parameterTypes":["java.lang.Object"] }, 
     {"name":"notifyDidBecomeActive","parameterTypes":[] }, 
     {"name":"notifyDidFinishLaunching","parameterTypes":[] }, 
-    {"name":"notifyDidResignActive","parameterTypes":[] }, 
     {"name":"notifyOpenFiles","parameterTypes":["java.lang.String[]"] }, 
     {"name":"notifyWillBecomeActive","parameterTypes":[] }, 
     {"name":"notifyWillFinishLaunching","parameterTypes":[] }, 
-    {"name":"notifyWillResignActive","parameterTypes":[] }, 
     {"name":"reportException","parameterTypes":["java.lang.Throwable"] }
   ]
 },
@@ -138,19 +136,6 @@
   "methods":[
     {"name":"notifyApplicationDidTerminate","parameterTypes":[] }, 
     {"name":"setEventThread","parameterTypes":[] }
-  ]
-},
-{
-  "name":"com.sun.glass.ui.mac.MacGestureSupport",
-  "methods":[
-    {"name":"gestureFinished","parameterTypes":["com.sun.glass.ui.View","int","int","int","int","int"] }, 
-    {"name":"magnifyGesturePerformed","parameterTypes":["com.sun.glass.ui.View","int","int","int","int","int","float"] }, 
-    {"name":"notifyBeginTouchEvent","parameterTypes":["com.sun.glass.ui.View","int","int"] }, 
-    {"name":"notifyEndTouchEvent","parameterTypes":["com.sun.glass.ui.View"] }, 
-    {"name":"notifyNextTouchEvent","parameterTypes":["com.sun.glass.ui.View","int","long","float","float"] }, 
-    {"name":"rotateGesturePerformed","parameterTypes":["com.sun.glass.ui.View","int","int","int","int","int","float"] }, 
-    {"name":"scrollGesturePerformed","parameterTypes":["com.sun.glass.ui.View","int","int","int","int","int","int","float","float"] }, 
-    {"name":"swipeGesturePerformed","parameterTypes":["com.sun.glass.ui.View","int","int","int","int","int","int"] }
   ]
 },
 {
