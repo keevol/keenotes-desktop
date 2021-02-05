@@ -1,11 +1,10 @@
 package com.keevol.keenotes.desk
 
 import animatefx.animation.{FadeInUp, FlipInY}
-import com.dlsc.preferencesfx.view.UndoRedoBox
 import com.jfoenix.controls.JFXSnackbar.SnackbarEvent
 import com.jfoenix.controls.{JFXButton, JFXSnackbar, JFXSnackbarLayout}
 import com.keevol.javafx.utils.Platforms._
-import com.keevol.javafx.utils.{AnchorPanes, Icons, Images, Stages}
+import com.keevol.javafx.utils.{AnchorPanes, Icons, Images, Stages, SystemTrays}
 import com.keevol.keenotes.KeeNoteCard
 import com.keevol.keenotes.desk.KeeNotesFXApplication.{makeClickable, version}
 import com.keevol.keenotes.desk.controls.InProgressMask
@@ -36,6 +35,7 @@ import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.awt.TrayIcon
 import java.util.concurrent.atomic.AtomicReference
 import java.util.{Date, Locale, ResourceBundle}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -103,8 +103,14 @@ class KeeNotesFXApplication extends Application {
   val snackBar = new JFXSnackbar()
   snackBar.setPrefWidth(400)
 
+  val tray: AtomicReference[TrayIcon] = new AtomicReference[TrayIcon]
+
   override def start(stage: Stage): Unit = {
     primaryStage = stage
+
+    tray.set(SystemTrays.create(primaryStage, "/images/tray-icon.png","KeeNotes")(popupMenu => {
+      // add more menu items if necessary
+    }))
 
     primaryScene = setupPrimaryScene()
     preferenceScene = setupPreferenceScene()
