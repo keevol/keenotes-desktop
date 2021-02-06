@@ -1,8 +1,8 @@
 # KeeNotes Desktop
 
-KeeNotes is a Privacy-Preferred Personal Knowledgebase Management Tool.
+KeeNotes is a Privacy-First Personal KnowledgeBase Management Tool.
 
-keenotes的桌面客户端，一个个人的闪念知识库。
+KeeNotes的桌面客户端，一个个人的闪念知识库。
 
 自己的只言片语和念头也需要一个数字烂笔头儿
 
