@@ -18,11 +18,19 @@ I hope you can give it a try and [any feedback](https://github.com/keevol/keenot
 
 ![](images/how_it_look.png)
 
-可以直接[下载MacOS版](https://github.com/keevol/keenotes-desktop/releases)使用。
+
+# 下载与安装
+
+可以
+
+- 直接[下载MacOS版](https://github.com/keevol/keenotes-desktop/releases) 并安装 
+- 或者命令行运行 `brew tap keevol/keenotes && brew install --cask keenotes`(如果您本机有安装homebrew的话，可以选择这种安装方式，这种方式不需要处理安装文件quarantine权限问题)
+
+之后，启动"KeeNotes Desktop.app"即可开始使用。
 
 [演示动画可以参看这里](https://github.com/keevol/keenotes-desktop/releases/download/v1.2.1/Screen-Recording-2021-02-03-at-21.44.34.gif)， 因为比较占屏幕空间，就不inline到README啦~
 
-# 常见问题（You Might Want to know)
+# 常见问题（You Might Want to know）
 
 ## dmg文件损坏（dmg file damaged/warning/error）
 
@@ -43,9 +51,6 @@ I hope you can give it a try and [any feedback](https://github.com/keevol/keenot
 
 # 相似产品
 
-- https://supernotes.app/
-- https://memordo.com/app/public/325
-- https://flomoapp.com/
-- https://idea.xinxiao.tech/
-- https://privanote.xyz/
+参看: <https://github.com/keevol/keenotes-desktop/wiki/KeeNotes-Desk-WIki-Home>
+
 
