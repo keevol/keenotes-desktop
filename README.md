@@ -36,7 +36,7 @@ I hope you can give it a try and [any feedback](https://github.com/keevol/keenot
 
 > 小小提醒(TIP)
 > 
-> 如果你是开发者，本机安装有homebrew，可以直接`brew cask install keenotes && brew install --cask keenotes`而省去运行以上命令去除quarantine的烦恼。
+> 如果你是开发者，本机安装有homebrew，可以直接`brew tap keevol/keenotes && brew install --cask keenotes`而省去运行以上命令去除quarantine的烦恼。
 > 
 > 更多信息可以参考<https://github.com/keevol/keenotes-desktop/wiki/%E4%BD%BF%E7%94%A8homebrew%E5%AE%89%E8%A3%85keenotes>
 
