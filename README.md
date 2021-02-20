@@ -51,6 +51,6 @@ I hope you can give it a try and [any feedback](https://github.com/keevol/keenot
 
 # 相似产品
 
-参看: <https://github.com/keevol/keenotes-desktop/wiki/KeeNotes-Desk-WIki-Home>
+参看: <https://github.com/keevol/keenotes-desktop/wiki/%E7%9B%B8%E4%BC%BC%E4%BA%A7%E5%93%81%E5%88%97%E8%A1%A8>
 
 

@@ -16,11 +16,11 @@
         <scala.version>2.12.12</scala.version>
         <scala.plugin.version>4.4.0</scala.plugin.version>
         <!--        <javafx.version>11.0.2</javafx.version>-->
-        <javafx.version>15.0.1</javafx.version>
+        <!--        <javafx.version>15.0.1</javafx.version>-->
+        <javafx.version>16-ea+7</javafx.version>
         <javafx.plugin.version>0.0.5</javafx.plugin.version>
-        <client.plugin.version>0.1.35</client.plugin.version>
+        <client.plugin.version>0.1.36</client.plugin.version>
         <main.class>com.keevol.keenotes.desk.KeeNotesFXApplicationLauncher</main.class>
-        <!--        <javafx.version>16-ea+6</javafx.version>-->
     </properties>
 
     <repositories>
